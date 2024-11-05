@@ -1,6 +1,6 @@
 param location string = 'northeurope'
 param aksClusterName string = 'dg-aks-prod'
-param cosmosDbAccountName string = 'dg-cosmosDbAccount'
+param cosmosDbAccountName string = 'DGCosmosDBAccount'
 param frontDoorName string = 'dg-fd-prod'
 
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
@@ -9,6 +9,13 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-previ
   kind: 'MongoDB'
   properties: {
     databaseAccountOfferType: 'Standard'
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+      }
+    ]
+    createMode: 'Default' // Add the createMode property
   }
 }
 
@@ -31,7 +38,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-03-01' = {
     }
   }
   dependsOn: [
-    cosmosDbAccount
+    cosmosDbAccount // Ensure that AKS depends on Cosmos DB
   ]
 }
 
@@ -41,7 +48,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
   properties: {
     backendPools: [
       {
-        name: 'dg-be-pool'
+        name: 'myBackendPool'
         properties: {
           backends: [
             {
@@ -67,7 +74,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
         properties: {
           frontendEndpoints: [
             {
-              id: frontDoor.id
+              id: frontDoor.id // Ensure you're not causing a circular reference here
             }
           ]
           acceptedProtocols: [
@@ -79,7 +86,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
           routeConfiguration: {
             odataType: '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
             backendPool: {
-              id: frontDoor.properties.backendPools[0].id
+              id: frontDoor.properties.backendPools[0].id // This should refer to an existing backend pool
             }
           }
         }
@@ -87,6 +94,6 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
     ]
   }
   dependsOn: [
-    aksCluster
+    aksCluster // Ensure that Front Door depends on AKS
   ]
 }
