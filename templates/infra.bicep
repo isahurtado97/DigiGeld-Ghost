@@ -3,6 +3,15 @@ param aksClusterName string = 'dg-aks-prod'
 param cosmosDbAccountName string = 'dg-cosmosDbAccount'
 param frontDoorName string = 'dg-fd-prod'
 
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
+  name: cosmosDbAccountName
+  location: location
+  kind: 'MongoDB'
+  properties: {
+    databaseAccountOfferType: 'Standard'
+  }
+}
+
 resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-03-01' = {
   name: aksClusterName
   location: location
@@ -21,15 +30,9 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-03-01' = {
       secret: '<ServicePrincipalSecret>'
     }
   }
-}
-
-resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
-  name: cosmosDbAccountName
-  location: location
-  kind: 'MongoDB'
-  properties: {
-    databaseAccountOfferType: 'Standard'
-  }
+  dependsOn: [
+    cosmosDbAccount
+  ]
 }
 
 resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
@@ -83,4 +86,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
       }
     ]
   }
+  dependsOn: [
+    aksCluster
+  ]
 }
