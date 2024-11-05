@@ -10,7 +10,7 @@ variables:
   azureServiceConnection: 'DigiGeld SC'
   location: 'northeurope'
   resourceGroupName: 'dg-rg-prod'
-  templateFile: 'template\infra.bicep'
+  templateFile: 'templates/infra.bicep'
 
 stages:
   - stage: Deploy
