@@ -3,6 +3,9 @@ trigger:
     include:
       - main
 
+pool:
+  name: 'Linux-sh-pool'
+
 variables:
   azureServiceConnection: 'DigiGeld SC'
   location: 'northeurope'
