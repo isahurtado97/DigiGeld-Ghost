@@ -41,7 +41,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
   properties: {
     backendPools: [
       {
-        name: 'myBackendPool'
+        name: 'dg-be-pool'
         properties: {
           backends: [
             {

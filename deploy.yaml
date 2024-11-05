@@ -3,9 +3,6 @@ trigger:
     include:
       - main
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   azureServiceConnection: 'DigiGeld SC'
   location: 'northeurope'
