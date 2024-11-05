@@ -74,7 +74,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
         properties: {
           frontendEndpoints: [
             {
-              id: frontDoor.id // Ensure you're not causing a circular reference here
+              id: frontDoor.properties.frontendEndpoints[0].id // Reference to existing frontend endpoint
             }
           ]
           acceptedProtocols: [
@@ -86,7 +86,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
           routeConfiguration: {
             odataType: '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
             backendPool: {
-              id: frontDoor.properties.backendPools[0].id // This should refer to an existing backend pool
+              id: frontDoor.properties.backendPools[0].id // This is valid since it's a direct reference after deployment
             }
           }
         }
@@ -94,6 +94,6 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
     ]
   }
   dependsOn: [
-    aksCluster // Ensure that Front Door depends on AKS
+    aksCluster // Ensuring the correct dependency
   ]
 }
