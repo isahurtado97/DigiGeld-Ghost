@@ -1,6 +1,13 @@
+@description('The location for all resources.')
 param location string = 'northeurope'
+
+@description('The name of the AKS cluster.')
 param aksClusterName string = 'dg-aks-prod'
+
+@description('The name of the Cosmos DB account.')
 param cosmosDbAccountName string = 'DGCosmosDBAccount'
+
+@description('The name of the Azure Front Door.')
 param frontDoorName string = 'dg-fd-prod'
 
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
@@ -15,7 +22,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-previ
         failoverPriority: 0
       }
     ]
-    createMode: 'Default' // Add the createMode property
+    createMode: 'Default'
   }
 }
 
@@ -37,9 +44,6 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-03-01' = {
       secret: '<ServicePrincipalSecret>'
     }
   }
-  dependsOn: [
-    cosmosDbAccount // Ensure that AKS depends on Cosmos DB
-  ]
 }
 
 resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
@@ -74,7 +78,7 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
         properties: {
           frontendEndpoints: [
             {
-              id: frontDoor.properties.frontendEndpoints[0].id // Reference to existing frontend endpoint
+              id: '${frontDoor.id}/frontendEndpoints/myFrontEnd'
             }
           ]
           acceptedProtocols: [
@@ -86,14 +90,11 @@ resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
           routeConfiguration: {
             odataType: '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
             backendPool: {
-              id: frontDoor.properties.backendPools[0].id // This is valid since it's a direct reference after deployment
+              id: '${frontDoor.id}/backendPools/myBackendPool'
             }
           }
         }
       }
     ]
   }
-  dependsOn: [
-    aksCluster // Ensuring the correct dependency
-  ]
 }
