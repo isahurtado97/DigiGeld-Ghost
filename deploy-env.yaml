@@ -1,21 +1,60 @@
 parameters:
+ - name: azureSubscription
+   type: string
  - name: resource_group
    type: string
  - name: location
    type: string
  - name: acr_name
    type: string
+ - name: cluster_name
+   type: string
 
 jobs:
   - deployment: deployEnvironment
-    displayNanme: Deploy Environment
+    displayName: Deploy Environment
     timeoutInMinutes: 250
     strategy:
       runOnce:
         deploy:
-           steps: none
-            #Deploy infra
-            #Deploy Image
-            #Test deployment
-            #Deploy security
+           steps: none 
+            #Deploy Infrastructure
+              - task: AzureCLI@2
+                condition: eq(variables['deployInfra'], 'true')
+                displayName: Deploying Infrastructure
+                inputs:
+                azureSubscription: ${{ parameters.azurSubscription }}
+                ScriptPath: scripts/deploy-infra.sh
+                ScriptType: pscore
+                ScriptArguments: ${{ parameters.resource_group }} ${{ parameters.location }} ${{ parameters.acr_name }} ${{ parameters.cluster_name }} 3 Standard_DS2_v2
+            ##Deploy Ghost Image
+            #  - task: AzurePowerShell@5
+            #    condition: eq(variables['deployApp'], 'true')
+            #    displayName: Deploying Image
+            #    inputs:
+            #    azureSubscription:
+            #    ScriptPath:
+            #    ScriptArguments:
+            #    AzurePowershellVersion: LatestVersion
+            #    pwsh: true
+            ##Test deployment
+            #- task: AzurePowerShell@5
+            #    condition: eq(variables['deployApp'], 'true')
+            #    displayName: Testing deployment 
+            #    inputs:
+            #    azureSubscription:
+            #    ScriptPath:
+            #    ScriptArguments:
+            #    AzurePowershellVersion: LatestVersion
+            #    pwsh: true
+            ##Deploy security and monitoring
+            #- task: AzurePowerShell@5
+            #    condition: eq(variables['deployApp'], 'true')
+            #    displayName: Deploying Security and Monitoring
+            #    inputs:
+            #    azureSubscription:
+            #    ScriptPath:
+            #    ScriptArguments:
+            #    AzurePowershellVersion: LatestVersion
+            #    pwsh: true
             

@@ -1,38 +1,45 @@
-# Variables
-RESOURCE_GROUP="dg-rg-prod"
-LOCATION="northeurope" # e.g., eastus, westus
-APP_SERVICE_PLAN="dg-asp-prod-neu"
-WEBAPP_NAME="dg-web-prod-neu"
-SQL_SERVER_NAME="dg-sql-prod-neu"
-SQL_DATABASE_NAME="ghostdb"
-SQL_ADMIN_USER="dg-admin-sql"
-SQL_ADMIN_PASSWORD="jpX6FRy8GwCx6ZErcZcs"
-GHOST_URL="dg-web-prod-neu.azurewebsites.net" # e.g., https://<YOUR_APP_NAME>.azurewebsites.net
+#!/bin/bash
 
-# Create Resource Group
+# Check if the required parameters are passed
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 <resource_group> <location> <acr_name> [<cluster_name> <node_count> <vm_size>]"
+    echo "Example: $0 dg-rg-prod northeurope dgacrprod dgaksprod 3 Standard_DS2_v2"
+    exit 1
+fi
+
+# Assign command-line arguments to variables
+RESOURCE_GROUP=$1
+LOCATION=$2
+ACR_NAME=$3
+CLUSTER_NAME=${4:-"example"}          # Default value if not provided
+NODE_COUNT=${5:-3}                      # Default node count if not provided
+VM_SIZE=${6:-"Standard_DS2_v2"}         # Default VM size if not provided
+
+# 1. Create Resource Group
+echo "Creating Resource Group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
-# Create App Service Plan
-az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku P1v2 --is-linux
+# 2. Create Azure Container Registry (ACR)
+echo "Creating Azure Container Registry..."
+az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Basic --admin-enabled true
 
-# Create Azure SQL Server
-az sql server create --name $SQL_SERVER_NAME --resource-group $RESOURCE_GROUP --location $LOCATION --admin-user $SQL_ADMIN_USER --admin-password $SQL_ADMIN_PASSWORD
+# 3. Create AKS Cluster and Attach ACR
+echo "Creating AKS Cluster..."
+az aks create \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME \
+  --node-count $NODE_COUNT \
+  --node-vm-size $VM_SIZE \
+  --enable-managed-identity \
+  --generate-ssh-keys \
+  --attach-acr $ACR_NAME \
+  --enable-addons monitoring \
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 5
 
-# Create Azure SQL Database
-az sql db create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name $SQL_DATABASE_NAME --service-objective S0
+# 4. Get AKS Credentials
+echo "Getting AKS Credentials..."
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
 
-# Create Azure App Service
-az webapp create --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --name $WEBAPP_NAME --runtime "NODE:16-lts"
-
-# Configure App Settings
-az webapp config appsettings set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --settings DATABASE_URL="Server=tcp:${SQL_SERVER_NAME}.database.windows.net,1433;Initial Catalog=${SQL_DATABASE_NAME};Persist Security Info=False;User ID=${SQL_ADMIN_USER};Password=${SQL_ADMIN_PASSWORD};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" GHOST_URL=$GHOST_URL NODE_ENV=production
-az webapp deployment source config --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --repo-url https://github.com/isahurtado97/Ghost.git --branch main --manual-integration
-
-# Enable Managed Identity (if required)
-az webapp identity assign --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME
-
-# Optional: Configure CORS if needed
-az webapp cors add --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --allowed-origins "*"
-
-# Output the Ghost URL
-echo "Ghost deployed successfully at: https://$WEBAPP_NAME.azurewebsites.net"
+echo "Deployment completed successfully."

@@ -26,9 +26,10 @@ stages:
      - name: DigiGeld
        code: prod
        azureSubscription: DigiGeld SC PROD
-       resource_group: dg-rg-prod
+       resource_group: dg-rg-prod1
        location: North Europe
-       acr_name: dgrgprod
+       acr_name: dgrgprod1
+       acr_name: dg-aks-prod1
      #DigiGeld ACC
      - name: DigiGeld
        code: acc
@@ -36,3 +37,4 @@ stages:
        resource_group: dg-rg-acc
        location: North Europe
        acr_name: dgacracc
+       cluster_name: dg-aks-acc
