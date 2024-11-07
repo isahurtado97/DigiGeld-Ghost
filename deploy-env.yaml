@@ -18,6 +18,7 @@ parameters:
 jobs:
   - deployment: deployEnvironment
     displayName: Deploy Environment
+    environment: none
     timeoutInMinutes: 250
     strategy:
       runOnce:
