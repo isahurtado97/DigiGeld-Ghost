@@ -29,7 +29,7 @@ stages:
        resource_group: dg-rg-prod1
        location: North Europe
        acr_name: dgrgprod1
-       acr_name: dg-aks-prod1
+       cluster_name: dg-aks-prod1
      #DigiGeld ACC
      - name: DigiGeld
        code: acc
