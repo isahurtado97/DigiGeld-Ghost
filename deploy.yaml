@@ -1,3 +1,4 @@
+triger: none
 parameters: 
   - name: deployInfra
     displayName: Deploy New Infrastructure
