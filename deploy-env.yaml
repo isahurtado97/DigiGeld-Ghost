@@ -1,14 +1,25 @@
 parameters:
- - name: azureSubscription
-   type: string
- - name: resource_group
-   type: string
- - name: location
-   type: string
- - name: acr_name
-   type: string
- - name: cluster_name
-   type: string
+  - name: azureSubscription
+    type: string
+    default: 'your-azure-subscription-id'
+  - name: resource_group
+    type: string
+    default: 'your-resource-group-name'
+  - name: location
+    type: string
+    default: 'northeurope'
+  - name: acr_name
+    type: string
+    default: 'your-acr-name'
+  - name: cluster_name
+    type: string
+    default: 'your-cluster-name'
+  - name: node_count
+    type: int
+    default: 3
+  - name: vm_size
+    type: string
+    default: 'Standard_DS2_v2'
 
 jobs:
   - deployment: deployEnvironment
@@ -17,16 +28,23 @@ jobs:
     strategy:
       runOnce:
         deploy:
-          steps: none 
-            #Deploy Infrastructure
+          steps:
+            # Deploy Infrastructure
             - task: AzureCLI@2
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
               inputs:
-              azureSubscription: ${{ parameters.azurSubscription }}
-              ScriptPath: scripts/deploy-infra.sh
-              ScriptType: pscore
-              ScriptArguments: ${{ parameters.resource_group }} ${{ parameters.location }} ${{ parameters.acr_name }} ${{ parameters.cluster_name }} 3 Standard_DS2_v2
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptType: 'pscore'
+                scriptPath: 'scripts/deploy-infra.sh'
+                arguments: >
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.location }}
+                  ${{ parameters.acr_name }}
+                  ${{ parameters.cluster_name }}
+                  ${{ parameters.node_count }}
+                  ${{ parameters.vm_size }}
+
             ##Deploy Ghost Image
             #  - task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')
