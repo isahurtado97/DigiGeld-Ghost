@@ -17,7 +17,7 @@ jobs:
     strategy:
       runOnce:
         deploy:
-           steps: none 
+          steps: none 
             #Deploy Infrastructure
             - task: AzureCLI@2
               condition: eq(variables['deployInfra'], 'true')
