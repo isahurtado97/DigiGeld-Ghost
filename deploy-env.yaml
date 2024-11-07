@@ -15,8 +15,8 @@ parameters:
     type: string
     default: 'your-cluster-name'
   - name: node_count
-    type: int
-    default: 3
+    type: string
+    default: '3'
   - name: vm_size
     type: string
     default: 'Standard_DS2_v2'
