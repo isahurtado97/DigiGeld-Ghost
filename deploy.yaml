@@ -1,4 +1,3 @@
-trigger: none
 parameters: 
   - name: deployInfra
     displayName: Deploy New Infrastructure
@@ -16,8 +15,6 @@ variables:
 
 pool:
   name: Linux-sh-pool
-
-resources: none
 
 stages:
   - template: pre-steps.yaml
