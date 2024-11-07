@@ -8,12 +8,12 @@ parameters:
 
 jobs:
   - deployment: deployEnvironment
-    displaynanme:
-    timeoutInMinutes:
+    displayNanme: Deploy Environment
+    timeoutInMinutes: 250
     strategy:
       runOnce:
         deploy:
-           steps:
+           steps: none
             #Deploy infra
             #Deploy Image
             #Test deployment
