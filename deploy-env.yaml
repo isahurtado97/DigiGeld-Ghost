@@ -14,7 +14,7 @@ parameters:
   - name: cluster_name
     type: string
     default: 'your-cluster-name'
-    
+
 jobs:
   - deployment: deployEnvironment
     displayName: Deploy Environment
@@ -36,8 +36,8 @@ jobs:
                   ${{ parameters.location }}
                   ${{ parameters.acr_name }}
                   ${{ parameters.cluster_name }}
-                  ${{ parameters.node_count }}
-                  ${{ parameters.vm_size }}
+                  3
+                  Standard_DS2_v2
 
             ##Deploy Ghost Image
             #  - task: AzurePowerShell@5
