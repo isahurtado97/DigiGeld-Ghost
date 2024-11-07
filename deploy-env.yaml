@@ -14,13 +14,7 @@ parameters:
   - name: cluster_name
     type: string
     default: 'your-cluster-name'
-  - name: node_count
-    type: string
-    default: '3'
-  - name: vm_size
-    type: string
-    default: 'Standard_DS2_v2'
-
+    
 jobs:
   - deployment: deployEnvironment
     displayName: Deploy Environment
