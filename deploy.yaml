@@ -1,44 +1,40 @@
-trigger:
-  branches:
-    include:
-      - main
+trigger: none
+parameters: 
+  - name: deployInfra
+    displayName: Deploy New Infrastructure
+    type: boolean
+    default: false
+  - name: deployApp
+    displayName: Deploy Application
+    type: boolean
+    default: false
+variables:
+  - name: deployInfra
+    value: ${{ eq(parameters.deployInfra, true) }}
+  - name: deployApp
+    value: ${{ eq(parameters.deployApp, true) }}
 
 pool:
-  name: 'Linux-sh-pool'
+  name: Linux-sh-pool
 
-variables:
-  azureServiceConnection: 'DigiGeld SC'
-  location: 'northeurope'
-  resourceGroupName: 'dg-rg-prod'
-  templateFile: 'templates/infra.bicep'
+resources: none
 
 stages:
-  - stage: Deploy
-    jobs:
-      - job: DeployInfrastructure
-        displayName: 'Deploy AKS, Cosmos DB, and Front Door'
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: $(azureServiceConnection)
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                # Check if the resource group exists
-                if ! az group exists --name $(resourceGroupName); then
-                  echo "Resource group $(resourceGroupName) does not exist. Creating..."
-                  az group create --name $(resourceGroupName) --location $(location)
-                else
-                  echo "Resource group $(resourceGroupName) already exists."
-                fi
-
-                # Deploy the Bicep template to the resource group
-                az bicep install
-                az deployment group create \
-                  --resource-group $(resourceGroupName) \
-                  --template-file $(templateFile) \
-                  --parameters location=$(location) \
-                    aksClusterName=myAKSCluster \
-                    cosmosDbAccountName=myCosmosDBAccount \
-                    frontDoorName=myFrontDoor
-            displayName: 'Deploy Resources with Bicep'
+  - template: pre-steps.yaml
+  - template: env.yaml
+    parameters: 
+     environments:
+     #DigiGeld PROD
+     - name: DigiGeld
+       code: prod
+       azureSubscription: DigiGeld SC PROD
+       resource_group: dg-rg-prod
+       location: North Europe
+       acr_name: dgrgprod
+     #DigiGeld ACC
+     - name: DigiGeld
+       code: acc
+       azureSubscription: DigiGeld SC ACC
+       resource_group: dg-rg-acc
+       location: North Europe
+       acr_name: dgacracc

@@ -1,0 +1,21 @@
+parameters:
+ - name: resource_group
+   type: string
+ - name: location
+   type: string
+ - name: acr_name
+   type: string
+
+jobs:
+  - deployment: deployEnvironment
+    displaynanme:
+    timeoutInMinutes:
+    strategy:
+      runOnce:
+        deploy:
+           steps:
+            #Deploy infra
+            #Deploy Image
+            #Test deployment
+            #Deploy security
+            
