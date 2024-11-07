@@ -1,1 +1,9 @@
 #install azcli,azps and acr image(dock build)
+stages:
+ - stage: build
+    displayName: Preparation steps
+    jobs:
+      job: Install modules and dependecies
+      displayName: Install modules and dependecies
+      steps:
+        
