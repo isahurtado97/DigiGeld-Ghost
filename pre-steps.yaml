@@ -6,4 +6,18 @@ stages:
       - job: Install modules and dependecies
         displayName: Install modules and dependecies
         steps:
-        
+          - task: AzureCLI@2
+            inputs:
+              displayName: 'Build and Push Docker Image to ACR'
+              azureSubscription: 'YourAzureServiceConnection'  # Replace with your Azure service connection name in Azure DevOps
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Log in to Azure Container Registry
+                az acr login --name $(ACR_NAME)
+
+                # Build the Docker image
+                docker build -t $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(Build.BuildId) .
+
+                # Push the Docker image to ACR
+                docker push $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(Build.BuildId)
