@@ -49,3 +49,13 @@ stages:
         echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
         echo "Output ImageTag: ghost-$(Build.BuildId)"
       displayName: "Set Output Variable"
+    
+    # Step 6: Output Full ACR Image URL
+    - script: |
+        ACR_NAME=${{ parameters.acr_name }}
+        IMAGE_TAG=ghost-$(Build.BuildId)
+        IMAGE_URL="${ACR_NAME}.azurecr.io/${IMAGE_TAG}"
+        
+        echo "##vso[task.setvariable variable=ImageURL;isOutput=true]$IMAGE_URL"
+        echo "Output ACR Image URL: $IMAGE_URL"
+      displayName: "Set Output Variable for ACR Image URL"
