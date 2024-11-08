@@ -7,22 +7,11 @@ stages:
     variables:
       Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
     steps:
-    # Step 1: Clone the Ghost Repository
-    - script: |
-        git clone https://github.com/isahurtado97/Ghost.git $(Build.SourcesDirectory)/Ghost
-      displayName: "Clone Ghost Repository"
-
-    # Step 2: Copy Files to Artifact Staging Directory
     - task: CopyFiles@2
       inputs:
         SourceFolder: $(Build.SourcesDirectory)
-        Contents: '**' # Include all files, including the cloned repo
         TargetFolder: $(Build.ArtifactStagingDirectory)
-      displayName: "Copy Files to Artifact Staging Directory"
-
-    # Step 3: Publish the Artifact
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: $(Build.ArtifactStagingDirectory)
         artifact: artifacts
-      displayName: "Publish Pipeline Artifact"
