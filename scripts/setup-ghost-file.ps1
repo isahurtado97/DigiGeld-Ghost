@@ -2,7 +2,7 @@ param(
     $filepath,
     $filefinalpath,
     $password,
-    $image ='dgacrprod.azurecr.io/ghost-app:latest'
+    $image #'dgacrprod.azurecr.io/ghost-app:latest'
 )
 process{
     $file = Get-Content $filepath
