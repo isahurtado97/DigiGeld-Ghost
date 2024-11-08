@@ -45,12 +45,13 @@ jobs:
               condition: eq(variables['deployApp'], 'true')
               displayName: Customizing ghost-deployment.yaml file
               inputs:
-                ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/setup-ghost-file.ps1'
-                ScriptArguments: >
-                  -filepath '$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml' 
-                  -filefinalpath '$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml' 
-                  -password 'xxxsss' 
-                  -image $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
+                targetType: 'filePath'
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/setup-ghost-file.ps1'
+                arguments: >
+                  -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
+                  -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml" 
+                  -password "xxxsss" 
+                  -image "$(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
                 pwsh: true
             # Deploy Ghost Image
             - task: Bash@3
