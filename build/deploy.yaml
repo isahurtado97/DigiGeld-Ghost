@@ -46,6 +46,6 @@ stages:
           $(Build.BuildId)   
     # Step 5: Output Tag
     - script: |
-      echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
-      echo "Output ImageTag: ghost-$(Build.BuildId)"
-    displayName: "Set Output Variable"
+        echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
+        echo "Output ImageTag: ghost-$(Build.BuildId)"
+      displayName: "Set Output Variable"
