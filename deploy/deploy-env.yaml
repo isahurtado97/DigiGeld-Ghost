@@ -43,7 +43,7 @@ jobs:
 
             # Debug Resolved Variables
             - script: |
-                echo "Resolved Image URL: "$(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
+                echo "Resolved Image URL: " variables['image_url']
               displayName: "Debug Resolved Variable"
 
             # Customize ghost-deployment.yaml file
@@ -57,7 +57,7 @@ jobs:
                   -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml" 
                   -password "xxxsss" 
-                  -image $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
+                  -image variables['image_url']
                 pwsh: true
 
             # Deploy Ghost Image
