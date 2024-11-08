@@ -45,9 +45,14 @@ jobs:
               condition: eq(variables['deployApp'], 'true')
               displayName: Customizing ghost-deployment.yaml file
               inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
                 ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/setup-ghost-file.ps1'
-                ScriptArguments: -filepath '$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml' -filefinalpath '$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml' -password 'xxxsss' -image $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
-                AzurePowershellVersion: LatestVersion
+                ScriptArguments: >
+                  -filepath '$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml' 
+                  -filefinalpath '$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml' 
+                  -password 'xxxsss' 
+                  -image $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
+                AzurePowerShellVersion: LatestVersion
                 pwsh: true
             # Deploy Ghost Image
             - task: Bash@3
