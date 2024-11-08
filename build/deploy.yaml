@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 parameters:
-  acr_name: ''
+  acr_name: 'dgacrprod'
 
 stages:
 - stage: CloneAndPublish
