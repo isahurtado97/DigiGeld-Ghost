@@ -10,7 +10,11 @@ parameters:
     displayName: Deploy Application
     type: boolean
     default: true
-
+  
+  - name: build_id
+    displayName: Build Id for ACR Image
+    type: string
+    default: latest
 variables:
   - name: deployInfra
     value: ${{ eq(parameters.deployInfra, true) }}
@@ -34,8 +38,7 @@ stages:
 
   - template: env.yaml
     parameters: 
-      build_id: $(Build.BuildId)
-      environments:
+      build_id: ${{parameters.build_id}}
         # DigiGeld ACC
         - name: DigiGeld
           code: acc
