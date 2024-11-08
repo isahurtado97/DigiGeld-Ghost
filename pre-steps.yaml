@@ -11,5 +11,7 @@ stages:
       inputs:
         SourceFolder: $(Build.SourcesDirectory)
         TargetFolder: $(Build.ArtifactStagingDirectory)/s
-    -publish: $(Build.ArtifactStagingDirectory)
-      artifact: artifacts
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: $(Build.ArtifactStagingDirectory)
+        artifact: artifacts
