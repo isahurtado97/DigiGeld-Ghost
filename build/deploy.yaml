@@ -37,7 +37,6 @@ stages:
     
     # Step 4: Build and push image
     - task: Bash@3
-      condition: eq(variables['deployApp'], 'true')
       displayName: Building Image
       inputs:
         filePath: '$(Pipeline.Workspace)/artifacts/scripts/build-image.sh'
