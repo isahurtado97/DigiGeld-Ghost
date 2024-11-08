@@ -47,7 +47,8 @@ stages:
           location: northeurope
           acr_name: dgacracc
           cluster_name: dg-aks-acc
-          dependsOn: pre-steps # DigiGeld_acc depends on pre-steps
+          dependsOn: 
+            -pre-steps # DigiGeld_acc depends on pre-steps
 
         # DigiGeld PROD
         - name: DigiGeld
@@ -57,4 +58,6 @@ stages:
           location: northeurope
           acr_name: dgacrprod1
           cluster_name: dg-aks-prod1
-          dependsOn: DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
+          dependsOn: 
+            -pre-steps 
+            -DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
