@@ -14,7 +14,7 @@ parameters:
   - name: cluster_name
     type: string
     default: 'your-cluster-name'
-  - name: appVersion
+  - name: build_id
     type: string
     default: 'latest'
 
