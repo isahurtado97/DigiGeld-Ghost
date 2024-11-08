@@ -25,7 +25,7 @@ stages:
     - script: |
         echo "Calculating artifact version..."
         echo "##vso[task.setvariable variable=ArtifactVersion]ghost-$(Build.BuildId)"
-        echo "Artifact Version: ghost-$(Build.BuildId)"
+        echo "Debug: Artifact Version set to ghost-$(Build.BuildId)"
       displayName: "Calculate Artifact Version"
 
     # Step 3: Publish the Repository as an Artifact
@@ -47,8 +47,8 @@ stages:
     # Step 5: Output Tag
     - script: |
         echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
-        echo "Output ImageTag: ghost-$(Build.BuildId)"
-      displayName: "Set Output Variable"
+        echo "Debug: Set ImageTag as ghost-$(Build.BuildId)"
+      displayName: "Set Output Variable for Image Tag"
     
     # Step 6: Output Full ACR Image URL
     - script: |
@@ -57,10 +57,5 @@ stages:
         IMAGE_URL="${ACR_NAME}.azurecr.io/${IMAGE_TAG}"
         
         echo "##vso[task.setvariable variable=ImageURL;isOutput=true]$IMAGE_URL"
-        echo "Output ACR Image URL: $IMAGE_URL"
+        echo "Debug: Set ImageURL as $IMAGE_URL"
       displayName: "Set Output Variable for ACR Image URL"
-    - script: |
-        echo "Artifact Version: $(ArtifactVersion)"
-        echo "Image Tag: $(ImageTag)"
-        echo "Image URL: $(ImageURL)"
-      displayName: "Debug Build Output Variables"
