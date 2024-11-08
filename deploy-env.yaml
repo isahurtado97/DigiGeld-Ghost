@@ -31,7 +31,7 @@ jobs:
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
                 scriptType: 'pscore'
-                scriptPath: '$(Build.ArtifactStagingDirectory)/artifacts/scripts/deploy-infra.sh'
+                scriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.location }}
