@@ -22,18 +22,19 @@ pool:
 
 resources:
   pipelines:
-  - pipeline: ghost-app-build
-    source: ghost-app-build
+    - pipeline: ghostAppBuild
+      source: ghost-app-build
+      trigger: none # Trigger manually or specify branches
 
 stages:
-  - stage: pre_steps # Updated to use an underscore
+  - stage: pre_steps
     displayName: Pre-steps
     jobs:
-      - template: pre-steps.yaml # Reference the corrected jobs template
+      - template: pre-steps.yaml # Reference the pre-steps jobs template
 
   - template: env.yaml
     parameters: 
-      build_id: $(resources.pipelines.ghostAppBuild.outputs['BuildJob.ImageTag']
+      build_id: $(resources.pipelines.ghostAppBuild.outputs['BuildJob.ImageTag'])
       environments:
         # DigiGeld ACC
         - name: DigiGeld

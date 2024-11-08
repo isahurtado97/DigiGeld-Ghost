@@ -2,9 +2,12 @@ parameters:
 - name: acr_name
   type: string
   default: 'acr_name' # Default Azure Container Registry name
+
 trigger: none
+
 pool:
   name: Linux-sh-pool
+
 stages:
 - stage: Build
   displayName: "Create Build"
@@ -44,6 +47,7 @@ stages:
           ${{ parameters.acr_name }}
           '$(Pipeline.Workspace)/artifacts/Ghost'
           $(Build.BuildId)   
+
     # Step 5: Output Tag
     - script: |
         echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
