@@ -1,6 +1,7 @@
 parameters:
   acr_name: 'dgacrprod'
 
+trigger: none
 stages:
 - stage: CloneAndPublish
   displayName: Clone Repository and Publish
