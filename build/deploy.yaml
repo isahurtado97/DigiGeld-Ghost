@@ -1,5 +1,7 @@
 parameters:
-  acr_name: 'dgacrprod' # Default Azure Container Registry name
+- name: acr_name
+  type: string
+  default: 'dgacrprod' # Default Azure Container Registry name
 
 trigger: none
 
