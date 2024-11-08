@@ -51,8 +51,9 @@ jobs:
                   -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml" 
                   -password "xxxsss" 
-                  -image "$(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
+                  -image "$(BuildJob.ImageURL)"
                 pwsh: true
+
             # Deploy Ghost Image
             - task: Bash@3
               condition: eq(variables['deployApp'], 'true')
