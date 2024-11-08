@@ -1,17 +1,14 @@
-stages:
-- stage: build
-  displayName: Preparation steps
-  jobs:
+jobs:
   - job: BuildJob
     displayName: Preparation Job
     variables:
       Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
     steps:
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: $(Build.SourcesDirectory)
-        TargetFolder: $(Build.ArtifactStagingDirectory)
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: $(Build.ArtifactStagingDirectory)
-        artifact: artifacts
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: $(Build.SourcesDirectory)
+          TargetFolder: $(Build.ArtifactStagingDirectory)
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: $(Build.ArtifactStagingDirectory)
+          artifact: artifacts
