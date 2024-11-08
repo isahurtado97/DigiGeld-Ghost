@@ -26,7 +26,7 @@ resources:
     source: ghost-app-build
 
 stages:
-  - stage: pre-steps
+  - stage: pre_steps # Updated to use an underscore
     displayName: Pre-steps
     jobs:
       - template: pre-steps.yaml # Reference the corrected jobs template
@@ -44,7 +44,7 @@ stages:
           acr_name: dgacracc
           cluster_name: dg-aks-acc
           dependsOn:
-            - pre-steps # DigiGeld_acc depends on pre-steps
+            - pre_steps # DigiGeld_acc depends on pre_steps
 
         # DigiGeld PROD
         - name: DigiGeld
@@ -55,5 +55,5 @@ stages:
           acr_name: dgacrprod1
           cluster_name: dg-aks-prod1
           dependsOn:
-            - pre-steps
+            - pre_steps
             - DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
