@@ -59,3 +59,8 @@ stages:
         echo "##vso[task.setvariable variable=ImageURL;isOutput=true]$IMAGE_URL"
         echo "Output ACR Image URL: $IMAGE_URL"
       displayName: "Set Output Variable for ACR Image URL"
+    - script: |
+        echo "Artifact Version: $(ArtifactVersion)"
+        echo "Image Tag: $(ImageTag)"
+        echo "Image URL: $(ImageURL)"
+      displayName: "Debug Build Output Variables"
