@@ -39,7 +39,7 @@ stages:
     - task: Bash@3
       displayName: Building Image
       inputs:
-        filePath: '$(Pipeline.Workspace)/artifacts/scripts/build-image.sh'
+        filePath: '$(Pipeline.Workspace)/scripts/build-image.sh'
         arguments: >
           ${{ parameters.acr_name }}
           '$(Pipeline.Workspace)/artifacts/Ghost'
