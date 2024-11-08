@@ -10,7 +10,7 @@ stages:
     - task: CopyFiles@2
       inputs:
         SourceFolder: $(Build.SourcesDirectory)
-        TargetFolder: $(Build.ArtifactStagingDirectory)/s
+        TargetFolder: $(Build.ArtifactStagingDirectory)
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: $(Build.ArtifactStagingDirectory)
