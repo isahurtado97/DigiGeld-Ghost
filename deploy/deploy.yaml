@@ -39,7 +39,6 @@ stages:
           location: northeurope
           acr_name: dgacracc
           cluster_name: dg-aks-acc
-          imageVersion: ${{ parameters.appVersion }}
 
         # DigiGeld PROD
         - name: DigiGeld
@@ -50,4 +49,4 @@ stages:
           acr_name: dgacrprod1
           cluster_name: dg-aks-prod1
           dependsOn: DigiGeld_acc
-          imageVersion: ${{ parameters.appVersion }}
+
