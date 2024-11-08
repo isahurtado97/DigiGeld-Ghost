@@ -33,7 +33,7 @@ stages:
 
   - template: env.yaml
     parameters: 
-      build_id: "$(resources.pipelines.ghostAppBuild.outputs['BuildJob.ImageTag'])"# Reference BuildId dynamically
+      build_id: $(resources.pipelines.ghostAppBuild.outputs['BuildJob.ImageTag']
       environments:
         # DigiGeld ACC
         - name: DigiGeld
