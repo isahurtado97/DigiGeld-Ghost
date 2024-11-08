@@ -13,9 +13,9 @@ parameters:
 
 variables:
   - name: deployInfra
-    value: ${{ parameters.deployInfra }}
+    value: ${{ eq(parameters.deployInfra, true) }}
   - name: deployApp
-    value: ${{ parameters.deployApp }}
+    value: ${{ eq(parameters.deployApp, true) }}
 
 pool:
   name: Linux-sh-pool
