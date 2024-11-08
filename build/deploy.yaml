@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 parameters:
   acr_name: ''
 
@@ -27,3 +28,6 @@ stages:
         targetPath: $(Pipeline.Workspace)/artifacts/Ghost
         artifact: $(ArtifactVersion)
       displayName: "Publish Repository as Artifact with Version"
+=======
+#
+>>>>>>> e967fd37640b1d3643efccf1c860b6cd0bc8da11
