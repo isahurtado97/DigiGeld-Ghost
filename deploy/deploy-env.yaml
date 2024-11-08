@@ -42,7 +42,7 @@ jobs:
                   Standard_DS2_v2
             # Customize ghost-deployment.yaml file
             - script: |
-              echo "Resolved Image URL: $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
+                echo "Resolved Image URL: $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
               displayName: "Debug Resolved Variable"
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
