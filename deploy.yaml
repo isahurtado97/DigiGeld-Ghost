@@ -11,7 +11,7 @@ parameters:
   - name: appVersion
     displayName: Application Version
     type: string
-    default: false
+    default: latest
 
 variables:
   - name: deployInfra
