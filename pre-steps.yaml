@@ -4,8 +4,6 @@ stages:
   jobs:
   - job: BuildJob
     displayName: Preparation Job
-    pool:
-      vmImage: 'ubuntu-latest'
     variables:
       Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
     steps:
