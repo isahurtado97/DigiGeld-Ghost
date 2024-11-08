@@ -22,14 +22,6 @@ stages:
   - template: env.yaml
     parameters: 
      environments:
-     #DigiGeld PROD
-     - name: DigiGeld
-       code: prod
-       azureSubscription: DigiGeld SC PROD
-       resource_group: dg-rg-prod1
-       location: North Europe
-       acr_name: dgrgprod1
-       cluster_name: dg-aks-prod1
      #DigiGeld ACC
      - name: DigiGeld
        code: acc
@@ -38,3 +30,12 @@ stages:
        location: North Europe
        acr_name: dgacracc
        cluster_name: dg-aks-acc
+     #DigiGeld PROD
+     - name: DigiGeld
+       code: prod
+       azureSubscription: DigiGeld SC PROD
+       resource_group: dg-rg-prod1
+       location: North Europe
+       acr_name: dgrgprod1
+       cluster_name: dg-aks-prod1
+       dependsOn: DigiGeld_acc
