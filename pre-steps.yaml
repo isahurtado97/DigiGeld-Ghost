@@ -2,10 +2,8 @@ stages:
 - stage: build
   displayName: Preparation steps
   jobs:
-  - job: BuildJob
-    displayName: Preparation Job
-    variables:
-      Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
+  - job: artifacts
+    displayName: Copy files and publish artifact
     steps:
     - task: CopyFiles@2
       inputs:
