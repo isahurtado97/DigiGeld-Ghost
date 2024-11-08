@@ -4,12 +4,12 @@ parameters:
   - name: deployInfra
     displayName: Deploy New Infrastructure
     type: boolean
-    default: false
+    default: true
 
   - name: deployApp
     displayName: Deploy Application
     type: boolean
-    default: false
+    default: true
 
 variables:
   - name: deployInfra

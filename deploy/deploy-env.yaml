@@ -32,7 +32,7 @@ jobs:
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
               inputs:
-                filePath: '$(Pipeline.Workspace)/scripts/deploy-infra.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.location }}
@@ -46,11 +46,11 @@ jobs:
               condition: eq(variables['deployApp'], 'true')
               displayName: Deploying Ghost Image
               inputs:
-                filePath: '$(Pipeline.Workspace)/scripts/ghost-deployment.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/ghost-deployment.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
-                  '$(Pipeline.Workspace)/templates/ghost-deployment.yaml'
+                  '$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml'
             ##Test deployment
             #- task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')
