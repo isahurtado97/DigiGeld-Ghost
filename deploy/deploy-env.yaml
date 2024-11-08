@@ -51,6 +51,7 @@ jobs:
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
                   $(BuildJob.ImageTag)
+                  '$(Pipeline.Workspace)/build/GhostRepo-61'
             ##Test deployment
             #- task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')
