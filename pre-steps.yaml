@@ -11,3 +11,5 @@ stages:
       inputs:
         SourceFolder: $(Build.SourcesDirectory)
         TargetFolder: $(Build.ArtifactStagingDirectory)/s
+    -publish: $(Build.ArtifactStagingDirectory)
+      artifact: artifacts
