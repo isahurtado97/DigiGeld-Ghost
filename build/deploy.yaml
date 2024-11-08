@@ -7,10 +7,10 @@ pool:
   name: Linux-sh-pool
 stages:
 - stage: Build
-  displayName: "Create Buildh"
+  displayName: "Create Build"
   jobs:
   - job: BuildJob
-    displayName: ""Build Application""
+    displayName: "Build Application"
     variables:
       Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/artifacts
     steps:
