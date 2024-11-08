@@ -1,0 +1,29 @@
+parameters:
+  acr_name: ''
+
+stages:
+- stage: CloneAndPublish
+  displayName: Clone Repository and Publish
+  jobs:
+  - job: CloneJob
+    displayName: Clone and Publish Job
+    variables:
+      Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/artifacts
+    steps:
+    # Step 1: Clone the Ghost Repository
+    - script: |
+        git clone https://github.com/isahurtado97/Ghost.git $(Pipeline.Workspace)/artifacts/Ghost
+      displayName: "Clone Ghost Repository"
+
+    # Step 2: Calculate Artifact Version
+    - script: |
+        echo "##vso[task.setvariable variable=ArtifactVersion]ghost-$(Build.BuildId)"
+        echo "Calculated Artifact Version: ghost-$(Build.BuildId)"
+      displayName: "Calculate Artifact Version"
+
+    # Step 3: Publish the Repository as an Artifact
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: $(Pipeline.Workspace)/artifacts/Ghost
+        artifact: $(ArtifactVersion)
+      displayName: "Publish Repository as Artifact with Version"
