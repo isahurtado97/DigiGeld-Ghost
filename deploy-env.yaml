@@ -25,13 +25,11 @@ jobs:
         deploy:
           steps:
             # Deploy Infrastructure
-            - task: AzureCLI@2
+            - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
               inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
-                scriptType: 'pscore'
-                scriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.location }}
@@ -39,7 +37,6 @@ jobs:
                   ${{ parameters.cluster_name }}
                   3
                   Standard_DS2_v2
-
             ##Deploy Ghost Image
             #  - task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')
