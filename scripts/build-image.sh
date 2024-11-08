@@ -1,7 +1,9 @@
-ACR_NAME="dgacrprod"
+ACR_NAME=$1
+IMAGE_PATH = $2
 DOCKER_REGISTRY_URL="${ACR_NAME}.azurecr.io"
 DOCKER_IMAGE="${DOCKER_REGISTRY_URL}/${CONTAINER_IMAGE}"
-CONTAINER_IMAGE="ghost-app:latest"
+CONTAINER_IMAGE="ghost-app:$3"
+
 # 3. Login en Azure Container Registry
 az acr login --name $ACR_NAME
 

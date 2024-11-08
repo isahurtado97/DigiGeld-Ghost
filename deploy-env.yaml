@@ -14,6 +14,9 @@ parameters:
   - name: cluster_name
     type: string
     default: 'your-cluster-name'
+  - name: appVersion
+    type: string
+    default: 'latest'
 
 jobs:
   - deployment: deployEnvironment
@@ -37,6 +40,16 @@ jobs:
                   ${{ parameters.cluster_name }}
                   3
                   Standard_DS2_v2
+            #Build Ghost Image
+            - task: Bash@3
+              condition: eq(variables['deployApp'], 'true')
+              displayName: Building Image
+              inputs:
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/build-image.sh'
+                arguments: >
+                  ${{ parameters.acr_name }}
+                  '$(Pipeline.Workspace)/artifacts/Ghost'
+                  ${{ parameters.appVersion }}
             ##Deploy Ghost Image
             #  - task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')

@@ -8,6 +8,11 @@ parameters:
     displayName: Deploy Application
     type: boolean
     default: false
+  - name: appVersion
+    displayName: Application Version
+    type: string
+    default: false
+
 variables:
   - name: deployInfra
     value: ${{ eq(parameters.deployInfra, true) }}
@@ -30,6 +35,7 @@ stages:
        location: northeurope
        acr_name: dgacracc
        cluster_name: dg-aks-acc
+       imageVersion: parameters.appVersion
      #DigiGeld PROD
      - name: DigiGeld
        code: prod
@@ -39,3 +45,4 @@ stages:
        acr_name: dgrgprod1
        cluster_name: dg-aks-prod1
        dependsOn: DigiGeld_acc
+       imageVersion: parameters.appVersion
