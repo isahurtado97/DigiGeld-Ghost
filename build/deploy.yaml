@@ -6,11 +6,11 @@ trigger: none
 pool:
   name: Linux-sh-pool
 stages:
-- stage: CloneAndPublish
-  displayName: "Clone Repository and Publish"
+- stage: Build
+  displayName: "Create Buildh"
   jobs:
-  - job: CloneJob
-    displayName: "Clone and Publish Job"
+  - job: BuildJob
+    displayName: ""Build Application""
     variables:
       Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/artifacts
     steps:
@@ -37,10 +37,15 @@ stages:
     
     # Step 4: Build and push image
     - task: Bash@3
-      displayName: Building Image
+      displayName: "Building Image and push to ACR"
       inputs:
         filePath: '$(Pipeline.Workspace)/s/scripts/build-image.sh'
         arguments: >
           ${{ parameters.acr_name }}
           '$(Pipeline.Workspace)/artifacts/Ghost'
           $(Build.BuildId)   
+    # Step 5: Output Tag
+    - script: |
+      echo "##vso[task.setvariable variable=ImageTag;isOutput=true]ghost-$(Build.BuildId)"
+      echo "Output ImageTag: ghost-$(Build.BuildId)"
+    displayName: "Set Output Variable"

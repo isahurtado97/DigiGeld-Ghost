@@ -41,5 +41,4 @@ az aks create \
 # 4. Get AKS Credentials
 echo "Getting AKS Credentials..."
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-
 echo "Deployment completed successfully."

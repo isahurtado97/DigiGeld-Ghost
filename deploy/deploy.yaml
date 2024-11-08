@@ -22,6 +22,10 @@ variables:
 pool:
   name: Linux-sh-pool
 
+resources:
+  pipelines: build
+  source: ghost-app-build
+
 stages:
   - template: pre-steps.yaml
   - template: env.yaml
