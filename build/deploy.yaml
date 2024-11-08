@@ -34,3 +34,14 @@ stages:
         targetPath: $(Pipeline.Workspace)/artifacts/Ghost
         artifact: GhostRepo-$(Build.BuildId) # Use a fixed prefix with dynamic version
       displayName: "Publish Repository as Artifact with Version"
+    
+    # Step 4: Build and push image
+    - task: Bash@3
+      condition: eq(variables['deployApp'], 'true')
+      displayName: Building Image
+      inputs:
+        filePath: '$(Pipeline.Workspace)/artifacts/scripts/build-image.sh'
+        arguments: >
+          ${{ parameters.acr_name }}
+          '$(Pipeline.Workspace)/artifacts/Ghost'
+          $(Build.BuildId)   
