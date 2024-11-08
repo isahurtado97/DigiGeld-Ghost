@@ -40,18 +40,17 @@ jobs:
                   ${{ parameters.cluster_name }}
                   3
                   Standard_DS2_v2
-            ##Deploy Ghost Image
+
+            # Deploy Ghost Image
             - task: Bash@3
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: Deploying Infrastructure
+              condition: eq(variables['deployApp'], 'true')
+              displayName: Deploying Ghost Image
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/scripts/ghost-deployment.sh'
                 arguments: >
-                    ${{ parameters.resource_group }}
-                    ${{ parameters.cluster_name }}
-                    $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageTag'])
-            #    AzurePowershellVersion: LatestVersion
-            #    pwsh: true
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.cluster_name }}
+                  $(BuildJob.ImageTag)
             ##Test deployment
             #- task: AzurePowerShell@5
             #    condition: eq(variables['deployApp'], 'true')
@@ -72,4 +71,3 @@ jobs:
             #    ScriptArguments:
             #    AzurePowershellVersion: LatestVersion
             #    pwsh: true
-            

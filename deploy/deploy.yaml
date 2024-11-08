@@ -11,11 +11,6 @@ parameters:
     type: boolean
     default: false
 
-  - name: appVersion
-    displayName: Application Version
-    type: string
-    default: latest
-
 variables:
   - name: deployInfra
     value: ${{ parameters.deployInfra }}

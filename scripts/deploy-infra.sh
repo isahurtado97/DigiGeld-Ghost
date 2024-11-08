@@ -36,6 +36,7 @@ az aks create \
   --enable-addons monitoring \
   --enable-cluster-autoscaler \
   --min-count 1 \
+  --node-resource-group $CLUSTER_NAME \
   --max-count 5
 
 # 4. Get AKS Credentials
