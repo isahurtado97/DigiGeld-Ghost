@@ -24,12 +24,6 @@ variables:
 pool:
   name: Linux-sh-pool
 
-resources:
-  pipelines:
-    - pipeline: ghostAppBuild
-      source: ghost-app-build
-      trigger: none # Trigger manually or specify branches
-
 stages:
   - stage: pre_steps
     displayName: Pre-steps
