@@ -1,8 +1,15 @@
-variables:
-  Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
-
-steps:
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: $(Build.SourcesDirectory)
-    TargetFolder: $(Build.ArtifactStagingDirectory)/s
+stages:
+- stage: build
+  displayName: Preparation steps
+  jobs:
+  - job: BuildJob
+    displayName: Preparation Job
+    pool:
+      vmImage: 'ubuntu-latest'
+    variables:
+      Build.ArtifactStagingDirectory: $(Pipeline.Workspace)/staging
+    steps:
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: $(Build.SourcesDirectory)
+        TargetFolder: $(Build.ArtifactStagingDirectory)/s
