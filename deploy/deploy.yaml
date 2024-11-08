@@ -29,15 +29,11 @@ stages:
   - stage: pre-steps
     displayName: Pre-steps
     jobs:
-      - job: Preparation
-        steps:
-          - script: |
-              echo "Executing pre-steps for infrastructure and application setup."
-            displayName: "Run Pre-steps"
+      - template: pre-steps.yaml # Reference the pre-steps.yaml template
 
   - template: env.yaml
     parameters: 
-      build_id: "$(resources.pipelines.ghost-app-build.buildId)" # Correct syntax for referencing BuildId
+      build_id: "$(resources.pipelines.ghost-app-build.buildId)" # Reference BuildId dynamically
       environments:
         # DigiGeld ACC
         - name: DigiGeld
@@ -47,8 +43,8 @@ stages:
           location: northeurope
           acr_name: dgacracc
           cluster_name: dg-aks-acc
-          dependsOn: 
-            -pre-steps # DigiGeld_acc depends on pre-steps
+          dependsOn:
+            - pre-steps # DigiGeld_acc depends on pre-steps
 
         # DigiGeld PROD
         - name: DigiGeld
@@ -58,6 +54,6 @@ stages:
           location: northeurope
           acr_name: dgacrprod1
           cluster_name: dg-aks-prod1
-          dependsOn: 
-            -pre-steps 
-            -DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
+          dependsOn:
+            - pre-steps
+            - DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
