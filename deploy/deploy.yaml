@@ -39,6 +39,7 @@ stages:
   - template: env.yaml
     parameters: 
       build_id: ${{parameters.build_id}}
+      environments:
         # DigiGeld ACC
         - name: DigiGeld
           code: acc
