@@ -8,7 +8,8 @@ CONTAINER_IMAGE="ghost-app:$3"
 az acr login --name $ACR_NAME
 
 # 4. Construir imagen Docker (ojo con el path)
+echo -e "Changing to image path $IMAGE_PATH"
+cd $IMAGE_PATH
 docker build -t $DOCKER_IMAGE .
-
 # 5. Subir imagen a ACR
 docker push $DOCKER_IMAGE
