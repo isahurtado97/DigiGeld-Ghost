@@ -40,10 +40,13 @@ jobs:
                   ${{ parameters.cluster_name }}
                   3
                   Standard_DS2_v2
-            # Customize ghost-deployment.yaml file
+
+            # Debug Resolved Variables
             - script: |
                 echo "Resolved Image URL: $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
               displayName: "Debug Resolved Variable"
+
+            # Customize ghost-deployment.yaml file
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
               displayName: Customizing ghost-deployment.yaml file
@@ -54,7 +57,7 @@ jobs:
                   -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml" 
                   -password "xxxsss" 
-                  -image $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
+                  -image "$(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])"
                 pwsh: true
 
             # Deploy Ghost Image
@@ -66,24 +69,4 @@ jobs:
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
-                  '$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml'
-            ##Test deployment
-            #- task: AzurePowerShell@5
-            #    condition: eq(variables['deployApp'], 'true')
-            #    displayName: Testing deployment 
-            #    inputs:
-            #    azureSubscription:
-            #    ScriptPath:
-            #    ScriptArguments:
-            #    AzurePowershellVersion: LatestVersion
-            #    pwsh: true
-            ##Deploy security and monitoring
-            #- task: AzurePowerShell@5
-            #    condition: eq(variables['deployApp'], 'true')
-            #    displayName: Deploying Security and Monitoring
-            #    inputs:
-            #    azureSubscription:
-            #    ScriptPath:
-            #    ScriptArguments:
-            #    AzurePowershellVersion: LatestVersion
-            #    pwsh: true
+                  "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml"

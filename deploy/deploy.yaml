@@ -22,7 +22,7 @@ pool:
 
 resources:
   pipelines:
-  - pipeline: build
+  - pipeline: ghost-app-build
     source: ghost-app-build
 
 stages:
@@ -49,4 +49,3 @@ stages:
           acr_name: dgacrprod1
           cluster_name: dg-aks-prod1
           dependsOn: DigiGeld_acc
-
