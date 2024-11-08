@@ -16,9 +16,6 @@ variables:
     value: ${{ eq(parameters.deployInfra, true) }}
   - name: deployApp
     value: ${{ eq(parameters.deployApp, true) }}
-  - name: image_url
-    value: $(resources.pipelines.ghost-app-build.outputs['BuildJob.ImageURL'])
-
 
 pool:
   name: Linux-sh-pool
@@ -33,6 +30,7 @@ stages:
 
   - template: env.yaml
     parameters: 
+      build_id: $(resources.pipelines.ghost-app-build.buildId)
       environments:
         # DigiGeld ACC
         - name: DigiGeld

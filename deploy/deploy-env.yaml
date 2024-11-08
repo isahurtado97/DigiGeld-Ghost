@@ -43,7 +43,7 @@ jobs:
 
             # Debug Resolved Variables
             - script: |
-                echo "Resolved Image URL: " variables['image_url']
+                echo "Resolved Image URL: ${{ parameters.acr_name }}.azurecr.io/ghost-${{ parameters.build_id }}"
               displayName: "Debug Resolved Variable"
 
             # Customize ghost-deployment.yaml file
@@ -57,7 +57,7 @@ jobs:
                   -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml" 
                   -password "xxxsss" 
-                  -image variables['image_url']
+                  -image "${{ parameters.acr_name }}.azurecr.io/ghost-${{ parameters.build_id }}"
                 pwsh: true
 
             # Deploy Ghost Image
