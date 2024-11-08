@@ -1,13 +1,16 @@
 trigger: none
+
 parameters: 
   - name: deployInfra
     displayName: Deploy New Infrastructure
     type: boolean
     default: false
+
   - name: deployApp
     displayName: Deploy Application
     type: boolean
     default: false
+
   - name: appVersion
     displayName: Application Version
     type: string
@@ -15,38 +18,41 @@ parameters:
 
 variables:
   - name: deployInfra
-    value: ${{ eq(parameters.deployInfra, true) }}
+    value: ${{ parameters.deployInfra }}
   - name: deployApp
-    value: ${{ eq(parameters.deployApp, true) }}
+    value: ${{ parameters.deployApp }}
 
 pool:
   name: Linux-sh-pool
 
 resources:
-  pipelines: build
-  source: ghost-app-build
+  pipelines:
+  - pipeline: build
+    source: ghost-app-build
 
 stages:
   - template: pre-steps.yaml
+
   - template: env.yaml
     parameters: 
-     environments:
-     #DigiGeld ACC
-     - name: DigiGeld
-       code: acc
-       azureSubscription: DigiGeld SC ACC
-       resource_group: dg-rg-acc
-       location: northeurope
-       acr_name: dgacracc
-       cluster_name: dg-aks-acc
-       imageVersion: parameters.appVersion
-     #DigiGeld PROD
-     - name: DigiGeld
-       code: prod
-       azureSubscription: DigiGeld SC PROD
-       resource_group: dg-rg-prod1
-       location: northeurope
-       acr_name: dgrgprod1
-       cluster_name: dg-aks-prod1
-       dependsOn: DigiGeld_acc
-       imageVersion: parameters.appVersion
+      environments:
+        # DigiGeld ACC
+        - name: DigiGeld
+          code: acc
+          azureSubscription: DigiGeld SC ACC
+          resource_group: dg-rg-acc
+          location: northeurope
+          acr_name: dgacracc
+          cluster_name: dg-aks-acc
+          imageVersion: ${{ parameters.appVersion }}
+
+        # DigiGeld PROD
+        - name: DigiGeld
+          code: prod
+          azureSubscription: DigiGeld SC PROD
+          resource_group: dg-rg-prod1
+          location: northeurope
+          acr_name: dgacrprod1
+          cluster_name: dg-aks-prod1
+          dependsOn: DigiGeld_acc
+          imageVersion: ${{ parameters.appVersion }}
