@@ -1,10 +1,10 @@
 parameters:
 - name: acr_name
   type: string
-  default: 'dgacrprod' # Default Azure Container Registry name
-
+  default: 'acr_name' # Default Azure Container Registry name
 trigger: none
-
+pool:
+  name: Linux-sh-pool
 stages:
 - stage: CloneAndPublish
   displayName: "Clone Repository and Publish"
