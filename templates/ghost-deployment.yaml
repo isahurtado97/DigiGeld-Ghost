@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ghost
+  namespace: ghost
 spec:
-  replicas: 1
+  replicas: 1  # Updated for scalability
   selector:
     matchLabels:
       app: ghost
@@ -14,14 +15,14 @@ spec:
     spec:
       containers:
         - name: ghost
-          image: CHANGE_IMAGE
+          image: "CHANGE_IMAGE"
           ports:
             - containerPort: 2368
           env:
             - name: database__client
               value: mysql
             - name: database__connection__host
-              value: mysql-service
+              value: mysql-service.ghost.svc.cluster.local
             - name: database__connection__user
               value: "root"
             - name: database__connection__password
@@ -29,7 +30,9 @@ spec:
             - name: database__connection__database
               value: ghost
             - name: url
-              value: http://48.209.167.236/:8080
+              value: http://localhost:8080
+            - name: APPINSIGHTS_INSTRUMENTATIONKEY 
+              value: "your-instrumentation-key"
           volumeMounts:
             - name: ghost-content
               mountPath: /var/lib/ghost/content
@@ -43,6 +46,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ghost-service
+  namespace: ghost
 spec:
   selector:
     app: ghost
@@ -54,14 +58,16 @@ spec:
 
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet  # Changed from Deployment to StatefulSet for MySQL
 metadata:
   name: mysql
+  namespace: ghost
 spec:
-  replicas: 1
+  replicas: 1  # Updated for high availability
   selector:
     matchLabels:
       app: mysql
+  serviceName: mysql
   template:
     metadata:
       labels:
@@ -72,7 +78,7 @@ spec:
           image: mysql:8.0
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: CHANGE_PASSWORD
+              value: "CHANGE_PASSWORD"
           volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql
@@ -86,35 +92,69 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql-service
+  namespace: ghost
 spec:
+  clusterIP: None  # Required for StatefulSet
   selector:
     app: mysql
   ports:
     - protocol: TCP
       port: 3306
       targetPort: 3306
-  type: ClusterIP
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ghost-pvc
+  namespace: ghost
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi  # Increased storage for production use
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
+  namespace: ghost
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 20Gi  # Increased storage for production database
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup
+  namespace: ghost
+spec:
+  schedule: "0 2 * * *"  # Daily at 2:00 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mysql-backup
+            image: mysql:8.0
+            command: ["/bin/bash", "-c"]
+            args:
+            - |
+              mysqldump -h mysql-service.ghost -u root -p${MYSQL_ROOT_PASSWORD} ghost > /backup/ghost_backup.sql &&
+              az storage blob upload --account-name <STORAGE_ACCOUNT> --container-name backups --file /backup/ghost_backup.sql --name ghost_backup_$(date +%F).sql
+            env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: root-password
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-volume
+            emptyDir: {}

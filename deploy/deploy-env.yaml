@@ -65,3 +65,4 @@ jobs:
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
                   "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml"
+                  'APPINSTKEY'

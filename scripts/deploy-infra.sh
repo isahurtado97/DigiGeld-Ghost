@@ -11,35 +11,130 @@ fi
 RESOURCE_GROUP=$1
 LOCATION=$2
 ACR_NAME=$3
-CLUSTER_NAME=${4:-"example"}          # Default value if not provided
-NODE_COUNT=${5:-3}                      # Default node count if not provided
-VM_SIZE=${6:-"Standard_DS2_v2"}         # Default VM size if not provided
+CLUSTER_NAME=${4:-"example"}  # Default value if not provided
+NODE_COUNT=${5:-3}  # Default node count if not provided
+VM_SIZE=${6:-"Standard_DS2_v2"}  # Default VM size if not provided
 
-# 1. Create Resource Group
-echo "Creating Resource Group..."
-az group create --name $RESOURCE_GROUP --location $LOCATION
+# 1. Create Resource Group if it does not exist
+echo "Checking Resource Group..."
+az group show --name $RESOURCE_GROUP --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating Resource Group..."
+    az group create --name $RESOURCE_GROUP --location $LOCATION --output none
+    if [ $? -eq 0 ]; then
+        echo "Resource Group $RESOURCE_GROUP created successfully."
+    else
+        echo "Failed to create Resource Group $RESOURCE_GROUP."
+        exit 1
+    fi
+else
+    echo "Resource Group $RESOURCE_GROUP already exists."
+fi
 
-# 2. Create Azure Container Registry (ACR)
-echo "Creating Azure Container Registry..."
-az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Basic --admin-enabled true
+# 2. Create Azure Container Registry (ACR) if it does not exist
+echo "Checking Azure Container Registry..."
+az acr show --name $ACR_NAME --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating Azure Container Registry..."
+    az acr create --resource-group $RESOURCE_GROUP --name $ACR_NAME --sku Basic --admin-enabled true --output none
+    if [ $? -eq 0 ]; then
+        echo "Azure Container Registry $ACR_NAME created successfully."
+    else
+        echo "Failed to create Azure Container Registry $ACR_NAME."
+        exit 1
+    fi
+else
+    echo "Azure Container Registry $ACR_NAME already exists."
+fi
 
-# 3. Create AKS Cluster and Attach ACR
-echo "Creating AKS Cluster..."
-az aks create \
-  --resource-group $RESOURCE_GROUP \
-  --name $CLUSTER_NAME \
-  --node-count $NODE_COUNT \
-  --node-vm-size $VM_SIZE \
-  --enable-managed-identity \
-  --generate-ssh-keys \
-  --attach-acr $ACR_NAME \
-  --enable-addons monitoring \
-  --enable-cluster-autoscaler \
-  --min-count 1 \
-  --node-resource-group $CLUSTER_NAME \
-  --max-count 5
+# 3. Create AKS Cluster if it does not exist
+echo "Checking AKS Cluster..."
+az aks show --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating AKS Cluster..."
+    az aks create \
+      --resource-group $RESOURCE_GROUP \
+      --name $CLUSTER_NAME \
+      --node-count $NODE_COUNT \
+      --node-vm-size $VM_SIZE \
+      --enable-managed-identity \
+      --generate-ssh-keys \
+      --attach-acr $ACR_NAME \
+      --enable-addons monitoring \
+      --enable-cluster-autoscaler \
+      --min-count 1 \
+      --node-resource-group $CLUSTER_NAME \
+      --max-count 5 \
+      --output none
+    if [ $? -eq 0 ]; then
+        echo "AKS Cluster $CLUSTER_NAME created successfully."
+    else
+        echo "Failed to create AKS Cluster $CLUSTER_NAME."
+        exit 1
+    fi
+else
+    echo "AKS Cluster $CLUSTER_NAME already exists."
+fi
 
-# 4. Get AKS Credentials
-echo "Getting AKS Credentials..."
-az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
-echo "Deployment completed successfully."
+# 4. Enable Azure Monitoring for observability if not already enabled
+echo "Enabling Azure Monitoring for observability..."
+az aks enable-addons --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --addons monitoring --workspace-resource-id "/subscriptions/your-subscription-id/resourcegroups/your-resource-group/providers/Microsoft.OperationalInsights/workspaces/$CLUSTER_NAME-ws" --output none
+az monitor app-insights component create --app $CLUSTER_NAME-ai --location $LOCATION --resource-group $RESOURCE_GROUP --application-type web --output none
+
+# 5. Set up Azure Backup Vault and Protection if they do not exist
+echo "Checking Azure Backup Vault..."
+az backup vault show --name $CLUSTER_NAME-bckp-vault --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating Azure Backup Vault..."
+    az backup vault create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME-bckp-vault --location $LOCATION --output none
+    if [ $? -eq 0 ]; then
+        echo "Backup vault $CLUSTER_NAME-bckp-vault created successfully."
+    else
+        echo "Failed to create backup vault $CLUSTER_NAME-bckp-vault."
+        exit 1
+    fi
+else
+    echo "Backup vault $CLUSTER_NAME-bckp-vault already exists."
+fi
+
+az backup protection enable-for-aks-cluster --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --vault-name $CLUSTER_NAME-bckp-vault --output none
+
+# 6. Automated cleanup serverless task
+echo "Setting up Azure Automation for cleanup task..."
+
+# Check if Automation Account exists
+az automation account show --name $CLUSTER_NAME-automation --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating Azure Automation Account..."
+    az automation account create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME-automation --location $LOCATION --output none
+    if [ $? -eq 0 ]; then
+        echo "Azure Automation Account $CLUSTER_NAME-automation created successfully."
+    else
+        echo "Failed to create Azure Automation Account $CLUSTER_NAME-automation."
+        exit 1
+    fi
+else
+    echo "Azure Automation Account $CLUSTER_NAME-automation already exists."
+fi
+
+# Check if Runbook exists
+az automation runbook show --automation-account-name $CLUSTER_NAME-automation --resource-group $RESOURCE_GROUP --name DeleteGhostPosts --output none >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Creating Azure Automation Runbook..."
+    az automation runbook create --resource-group $RESOURCE_GROUP --automation-account-name $CLUSTER_NAME-automation --name DeleteGhostPosts --type PowerShell --output none
+    if [ $? -eq 0 ]; then
+        echo "Azure Automation Runbook DeleteGhostPosts created successfully."
+        az automation runbook publish --resource-group $RESOURCE_GROUP --automation-account-name $CLUSTER_NAME-automation --name DeleteGhostPosts --output none
+    else
+        echo "Failed to create Azure Automation Runbook DeleteGhostPosts."
+        exit 1
+    fi
+else
+    echo "Azure Automation Runbook DeleteGhostPosts already exists."
+fi
+
+# Create job for Runbook
+echo "Creating job for Azure Automation Runbook..."
+az automation job create --resource-group $RESOURCE_GROUP --automation-account-name $CLUSTER_NAME-automation --runbook-name DeleteGhostPosts --parameters '{"GhostApiUrl":"https://your-ghost-api-url", "GhostApiKey":"your-ghost-api-key"}' --output none
+
+echo "Script completed successfully."
