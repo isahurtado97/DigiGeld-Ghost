@@ -3,7 +3,8 @@ param(
     [string]$resourceGroupName,
     [string]$location,
     [string]$acrName,
-    [string]$aksClusterName
+    [string]$aksClusterName,
+    [string]$azuresubscription
 )
 begin{
     function Ensure-AzModule {
@@ -43,7 +44,7 @@ begin{
 process {
     # Ensure Az module is installed and imported
     Ensure-AzModule
-    
+
     # Create Resource Group if not exists
     Create-AzResorceGroup -ResourceGroupName $ResourceGroupName -Location $location   
 
@@ -81,6 +82,7 @@ process {
         $workspaceId = $workspace.ResourceId
     }
     # Check if AKS Cluster exists
+    $Resourceid=(get-azresourcegroup 'dg-rg-acc')
     $aksCluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName -ErrorAction SilentlyContinue
     if (-not $aksCluster) {
         Write-Host "Creating AKS Cluster..."
@@ -96,7 +98,8 @@ process {
             -NodeMaxCount 5 `
             -AcrNameToAttach $acrName `
             -Location $location `
-            -SshKeyValue '/home/isa/.ssh/id_rsa'
+            -SshKeyValue '/home/isa/.ssh/id_rsa' `
+            -AssignIdentity $identity.Id
     } else {
         Write-Host "AKS Cluster '$aksClusterName' already exists."
     }
