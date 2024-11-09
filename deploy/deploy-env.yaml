@@ -33,7 +33,7 @@ jobs:
               displayName: Deploying Infrastructure
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
-                ScriptPath: '$(Pipeline.Workspace)/scripts/deploy-infra.ps1'
+                ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
                 ScriptArguments: >
                   -resourceGroupName ${{ parameters.resource_group }}
                   -location ${{ parameters.location }}
