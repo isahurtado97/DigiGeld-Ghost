@@ -24,18 +24,28 @@ begin{
             Write-Host "Az module successfully installed and imported."
         }
     }
+    function Create-AzResorceGroup {
+        param(
+            [string]$resourceGroupName,
+            [string]$location
+        )
+        # Check if Resource Group exists
+        $resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+        if (-not $resourceGroup) {
+            Write-Host "Creating Resource Group..."
+            New-AzResourceGroup -Name $resourceGroupName -Location $location
+        } else {
+            Write-Host "Resource Group '$resourceGroupName' already exists."
+        }
+
+    }
 }
 process {
     # Ensure Az module is installed and imported
     Ensure-AzModule
-    # Check if Resource Group exists
-    $resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
-    if (-not $resourceGroup) {
-        Write-Host "Creating Resource Group..."
-        New-AzResourceGroup -Name $resourceGroupName -Location $location
-    } else {
-        Write-Host "Resource Group '$resourceGroupName' already exists."
-    }
+    
+    # Create Resource Group if not exists
+    Create-AzResorceGroup -ResourceGroupName $ResourceGroupName -Location $location   
 
     # Check if Azure Container Registry (ACR) exists
     $acr = Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName -ErrorAction SilentlyContinue
