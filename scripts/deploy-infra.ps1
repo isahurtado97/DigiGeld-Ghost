@@ -52,7 +52,24 @@ process {
 
     # Get the ACR resource ID (used for AKS integration)
     $acrResourceId = (Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName).Id
+    # Check if Log Analytics Workspace exists
+    $workspace = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroupName -Name "$aksClusterName-Workspace" -ErrorAction SilentlyContinue
+    if ($workspace) {
+        Write-Host "Log Analytics Workspace '$aksClusterName-Workspace' already exists."
+        $workspaceId = $workspace.ResourceId
+    } else {
+        # Create Log Analytics Workspace
+        Write-Host "Creating Log Analytics Workspace: $aksClusterName-Workspace"
+        $workspace = New-AzOperationalInsightsWorkspace `
+            -ResourceGroupName $ResourceGroupName `
+            -Name "$aksClusterName-Workspace" `
+            -Location $Location `
+            -Sku $Sku `
+            -RetentionInDays 30 # Optional: Adjust retention as needed
 
+        Write-Host "Log Analytics Workspace created successfully."
+        $workspaceId = $workspace.ResourceId
+    }
     # Check if AKS Cluster exists
     $aksCluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName -ErrorAction SilentlyContinue
     if (-not $aksCluster) {
@@ -63,6 +80,7 @@ process {
             -NodeCount 3 `
             -NodeVmSize "Standard_DS2_v2" `
             -AddOnNameToBeEnabled  "Monitoring" `
+            - WorkspaceResourceId  $workspaceId `
             -EnableNodeAutoScaling `
             -NodeMinCount 1 `
             -NodeMaxCount 5 `
