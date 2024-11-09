@@ -33,13 +33,13 @@ jobs:
               displayName: Deploying Infrastructure
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
-                targetType: 'filePath'
-                filePath: '$(Pipeline.Workspace)/scripts/deploy-infra.ps1'
-                arguments: >
+                ScriptPath: '$(Pipeline.Workspace)/scripts/deploy-infra.ps1'
+                ScriptArguments: >
                   -resourceGroupName ${{ parameters.resource_group }}
                   -location ${{ parameters.location }}
                   -acrName ${{ parameters.acr_name }}
                   -aksClusterName ${{ parameters.cluster_name }}
+                azurePowerShellVersion: LatestVersion
                 pwsh: true
             # Customize ghost-deployment.yaml file
             - task: AzurePowerShell@5
