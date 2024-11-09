@@ -31,8 +31,6 @@ spec:
               value: ghost
             - name: url
               value: http://localhost:8080
-            - name: APPINSIGHTS_INSTRUMENTATIONKEY 
-              value: "your-instrumentation-key"
           volumeMounts:
             - name: ghost-content
               mountPath: /var/lib/ghost/content
