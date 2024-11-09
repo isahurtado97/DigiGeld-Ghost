@@ -28,7 +28,7 @@ jobs:
         deploy:
           steps:
             # Deploy Infrastructure
-            - task: PowerShell@2
+            - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
               inputs:
@@ -42,7 +42,7 @@ jobs:
                   -aksClusterName ${{ parameters.cluster_name }}
                 pwsh: true
             # Customize ghost-deployment.yaml file
-            - task: PowerShell@2
+            - task: AzurePowerShell@5
               condition: eq(variables['deployApp'], 'true')
               displayName: Customizing ghost-deployment.yaml file
               inputs:
