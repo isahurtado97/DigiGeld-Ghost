@@ -1,3 +1,4 @@
+System.Debug: true
 trigger: none
 
 parameters: 
@@ -20,6 +21,7 @@ variables:
     value: ${{ eq(parameters.deployInfra, true) }}
   - name: deployApp
     value: ${{ eq(parameters.deployApp, true) }}
+  
 
 pool:
   name: Linux-sh-pool
