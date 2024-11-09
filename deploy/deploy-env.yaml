@@ -32,14 +32,12 @@ jobs:
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
               inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.location }}
                   ${{ parameters.acr_name }}
                   ${{ parameters.cluster_name }}
-                  3
-                  Standard_DS2_v2
 
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
