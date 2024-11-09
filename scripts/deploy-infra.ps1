@@ -68,7 +68,7 @@ process {
             -NodeMaxCount 5 `
             -AcrNameToAttach $acrName `
             -Location $location `
-            -GenerateSshKey
+            -SshKeyValue '/home/isa/.ssh/id_rsa'
     } else {
         Write-Host "AKS Cluster '$aksClusterName' already exists."
     }
