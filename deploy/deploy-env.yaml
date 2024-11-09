@@ -31,8 +31,8 @@ jobs:
             - task: PowerShell@2
               condition: eq(variables['deployInfra'], 'true')
               displayName: Deploying Infrastructure
-              azureSubscription: ${{ parameters.azureSubscription }}
               inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
                 targetType: 'filePath'
                 filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
                 arguments: >
