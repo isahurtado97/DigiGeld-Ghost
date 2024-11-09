@@ -82,7 +82,8 @@ process {
         $workspaceId = $workspace.ResourceId
     }
     # Check if AKS Cluster exists
-    $Resourceid=(get-azresourcegroup 'dg-rg-acc')
+    $Resourceid=(get-azresourcegroup $resourceGroupName )
+    $identity = Get-AzUserAssignedIdentity -ResourceGroupName $resourceGroupName  -Name $aksClusterName 
     $aksCluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName -ErrorAction SilentlyContinue
     if (-not $aksCluster) {
         Write-Host "Creating AKS Cluster..."
