@@ -12,7 +12,7 @@ RESOURCE_GROUP=$1
 LOCATION=$2
 ACR_NAME=$3
 CLUSTER_NAME=${4:-"example"}  # Default value if not provided
-NODE_COUNT=${5:-3}  # Default node count if not provided
+NODE_COUNT=${5:-3}           # Default node count if not provided
 VM_SIZE=${6:-"Standard_DS2_v2"}  # Default VM size if not provided
 
 # 1. Create Resource Group if it does not exist
@@ -63,7 +63,6 @@ if [ $? -ne 0 ]; then
       --enable-addons monitoring \
       --enable-cluster-autoscaler \
       --min-count 1 \
-      --node-resource-group $CLUSTER_NAME \
       --max-count 5 \
       --output none
     if [ $? -eq 0 ]; then
@@ -76,70 +75,75 @@ else
     echo "AKS Cluster $CLUSTER_NAME already exists."
 fi
 
-# 4. Enable Azure Monitoring for observability if not already enabled
-echo "Enabling Azure Monitoring for observability..."
+# 4. Enable Azure Monitoring for observability
+echo "Checking Azure Monitoring addon..."
 az aks show --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP --query "addonProfiles.omsagent.enabled" --output tsv | grep true >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    az aks enable-addons --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --addons monitoring --workspace-resource-id "/subscriptions/your-subscription-id/resourcegroups/your-resource-group/providers/Microsoft.OperationalInsights/workspaces/$CLUSTER_NAME-ws" --output none
-    az monitor app-insights component create --app $CLUSTER_NAME-ai --location $LOCATION --resource-group $RESOURCE_GROUP --application-type web --output none
+    echo "Enabling Azure Monitoring addon..."
+    WORKSPACE_ID="/subscriptions/<subscription-id>/resourcegroups/<workspace-resource-group>/providers/Microsoft.OperationalInsights/workspaces/<workspace-name>"
+    az aks enable-addons --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --addons monitoring --workspace-resource-id $WORKSPACE_ID --output none
+    if [ $? -eq 0 ]; then
+        echo "Azure Monitoring addon enabled successfully."
+    else
+        echo "Failed to enable Azure Monitoring addon."
+        exit 1
+    fi
 else
     echo "Azure Monitoring addon is already enabled."
 fi
 
-# 5. Set up Azure Backup Vault if it does not exist
+# 5. Create Azure Backup Vault if it does not exist
 echo "Checking Azure Backup Vault..."
-az backup vault show --name $CLUSTER_NAME-bckp-vault --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+az backup vault show --name ${CLUSTER_NAME}-bckp-vault --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Creating Azure Backup Vault..."
-    az backup vault create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME-bckp-vault --location $LOCATION --output none
+    az backup vault create --resource-group $RESOURCE_GROUP --name ${CLUSTER_NAME}-bckp-vault --location $LOCATION --output none
     if [ $? -eq 0 ]; then
-        echo "Backup vault $CLUSTER_NAME-bckp-vault created successfully."
+        echo "Azure Backup Vault ${CLUSTER_NAME}-bckp-vault created successfully."
     else
-        echo "Failed to create backup vault $CLUSTER_NAME-bckp-vault."
+        echo "Failed to create Azure Backup Vault ${CLUSTER_NAME}-bckp-vault."
         exit 1
     fi
 else
-    echo "Backup vault $CLUSTER_NAME-bckp-vault already exists."
+    echo "Azure Backup Vault ${CLUSTER_NAME}-bckp-vault already exists."
 fi
 
-# Note: Remove the invalid command for enabling AKS cluster protection
-
-# 6. Automated cleanup serverless task
+# 6. Set up Azure Automation for cleanup task
 echo "Setting up Azure Automation for cleanup task..."
 
 # Check if Automation Account exists
-az automation account show --name $CLUSTER_NAME-automation --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
+az automation account show --name ${CLUSTER_NAME}-automation --resource-group $RESOURCE_GROUP --output none >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Creating Azure Automation Account..."
-    az automation account create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME-automation --location $LOCATION --output none
+    az automation account create --resource-group $RESOURCE_GROUP --name ${CLUSTER_NAME}-automation --location $LOCATION --output none
     if [ $? -eq 0 ]; then
-        echo "Azure Automation Account $CLUSTER_NAME-automation created successfully."
+        echo "Azure Automation Account ${CLUSTER_NAME}-automation created successfully."
     else
-        echo "Failed to create Azure Automation Account $CLUSTER_NAME-automation."
+        echo "Failed to create Azure Automation Account ${CLUSTER_NAME}-automation."
         exit 1
     fi
 else
-    echo "Azure Automation Account $CLUSTER_NAME-automation already exists."
+    echo "Azure Automation Account ${CLUSTER_NAME}-automation already exists."
 fi
 
 # Check if Runbook exists
-az automation runbook show --automation-account-name $CLUSTER_NAME-automation --resource-group $RESOURCE_GROUP --name DeleteGhostPosts --output none >/dev/null 2>&1
+az automation runbook show --automation-account-name ${CLUSTER_NAME}-automation --resource-group $RESOURCE_GROUP --name DeleteGhostPosts --output none >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Creating Azure Automation Runbook..."
-    az automation runbook create --resource-group $RESOURCE_GROUP --automation-account-name $CLUSTER_NAME-automation --name DeleteGhostPosts --type PowerShell --output none
+    az automation runbook create --resource-group $RESOURCE_GROUP --automation-account-name ${CLUSTER_NAME}-automation --name DeleteGhostPosts --type PowerShell --output none
     if [ $? -eq 0 ]; then
         echo "Azure Automation Runbook DeleteGhostPosts created successfully."
-        
+
         # Upload the PowerShell script content
         az automation runbook update \
           --resource-group $RESOURCE_GROUP \
-          --automation-account-name $CLUSTER_NAME-automation \
+          --automation-account-name ${CLUSTER_NAME}-automation \
           --name DeleteGhostPosts \
           --content-url "file://$(pwd)/DeleteGhostPosts.ps1" \
           --output none
 
         # Publish the runbook
-        az automation runbook publish --resource-group $RESOURCE_GROUP --automation-account-name $CLUSTER_NAME-automation --name DeleteGhostPosts --output none
+        az automation runbook publish --resource-group $RESOURCE_GROUP --automation-account-name ${CLUSTER_NAME}-automation --name DeleteGhostPosts --output none
     else
         echo "Failed to create Azure Automation Runbook DeleteGhostPosts."
         exit 1
@@ -147,6 +151,5 @@ if [ $? -ne 0 ]; then
 else
     echo "Azure Automation Runbook DeleteGhostPosts already exists."
 fi
-
 
 echo "Script completed successfully."
