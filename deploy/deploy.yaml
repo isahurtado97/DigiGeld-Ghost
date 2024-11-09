@@ -20,7 +20,6 @@ variables:
     value: ${{ eq(parameters.deployInfra, true) }}
   - name: deployApp
     value: ${{ eq(parameters.deployApp, true) }}3
-  - System.Debug: true
   
 
 pool:
