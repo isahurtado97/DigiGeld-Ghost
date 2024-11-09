@@ -34,7 +34,7 @@ jobs:
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
                 targetType: 'filePath'
-                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
+                filePath: '$(Pipeline.Workspace)/scripts/deploy-infra.ps1'
                 arguments: >
                   -resourceGroupName ${{ parameters.resource_group }}
                   -location ${{ parameters.location }}
