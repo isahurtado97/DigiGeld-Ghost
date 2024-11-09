@@ -24,8 +24,10 @@ begin{
             Write-Host "Az module successfully installed and imported."
         }
     }
-    
-
+    if (-not (Get-AzContext)) {
+        Write-Host "Authenticating with Azure..."
+        Connect-AzAccount -Environment AzureCloud
+    }
 }
 process {
     # Ensure Az module is installed and imported
