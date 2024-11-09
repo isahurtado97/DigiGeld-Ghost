@@ -24,13 +24,6 @@ begin{
             Write-Host "Az module successfully installed and imported."
         }
     }
-    if (-not (Get-AzContext)) {
-        # Authenticate using the Azure DevOps pipeline environment
-        $AzConnection = Connect-AzAccount -Identity -ErrorAction Stop
-        Write-Host "Azure authenticated successfully."
-    } else {
-        Write-Host "Azure context already set. Proceeding with the script."
-    }
 }
 process {
     # Ensure Az module is installed and imported
