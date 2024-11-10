@@ -42,16 +42,16 @@ jobs:
                   -basepath '$(Pipeline.Workspace)/artifacts/modules'
                 azurePowerShellVersion: LatestVersion
                 pwsh: true
-            ## Deploy aks cluster
-            #- task: Bash@3
-            #  condition: eq(variables['deployInfra'], 'true')
-            #  displayName: "Deploying Infrastructure: aks cluster"
-            #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-aks.sh'
-            #    arguments: >
-            #      ${{ parameters.resource_group }}
-            #      ${{ parameters.acr_name }}
-            #      ${{ parameters.cluster_name }}
+            # Deploy aks cluster
+            - task: Bash@3
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: "Deploying Infrastructure: aks cluster"
+              inputs:
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-aks.sh'
+                arguments: >
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.acr_name }}
+                  ${{ parameters.cluster_name }}
             #Deploy Keyvault
             - task: AzureCLI@2
               condition: eq(variables['deployInfra'], 'true')
