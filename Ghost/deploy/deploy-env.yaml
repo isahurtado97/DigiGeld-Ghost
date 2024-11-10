@@ -55,7 +55,7 @@ jobs:
             #Deploy Keyvault
             - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: AKS cluster"
+              displayName: "Deploying Infrastructure: Azure Key Vaul"
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/keyvault.sh'
                 arguments: >
@@ -69,7 +69,7 @@ jobs:
             #Enable Add-Ons and extra
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: 'Deploying Infrastructure: Azure Key Vault'
+              displayName: 'Deploying Infrastructure: Security and Extras'
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
