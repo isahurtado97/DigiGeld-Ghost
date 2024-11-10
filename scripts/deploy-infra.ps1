@@ -135,7 +135,7 @@ process {
     
     # Enable addons
     Write-Host "Enabling Azure Policy addon for Pod Security..."
-    Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -Name AzurePolicy
+    #Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -Name AzurePolicy
     Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
     #Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
 }
