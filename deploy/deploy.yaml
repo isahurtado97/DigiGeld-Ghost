@@ -19,7 +19,7 @@ variables:
   - name: deployInfra
     value: ${{ eq(parameters.deployInfra, true) }}
   - name: deployApp
-    value: ${{ eq(parameters.deployApp, true) }}3
+    value: ${{ eq(parameters.deployApp, true) }}
   
 
 pool:
