@@ -96,7 +96,7 @@ function Deploy-SecurityConfig {
         $PoolSetting = New-AzApplicationGatewayBackendHttpSetting -Name "$aksClusterName-poolsettings"  -Port 80 -Protocol "Http" -CookieBasedAffinity "Disabled"
         $FrontEndPort = New-AzApplicationGatewayFrontendPort -Name "$aksClusterName-fe"  -Port 80
         # Create a public IP address
-        $PublicIp = New-AzPublicIpAddress -ResourceGroupName $resourceGroupName -Name "$aksClusterName-pip" -Location "northeurope" -AllocationMethod "Static" -sku Standard
+        $PublicIp = New-AzPublicIpAddress -ResourceGroupName $resourceGroupName -Name "$aksClusterName-pip" -Location "northeurope" -AllocationMethod "Static" -sku Standard -Force
         $FrontEndIpConfig = New-AzApplicationGatewayFrontendIPConfig -Name "$aksClusterName-feconfig" -PublicIPAddress $PublicIp
         $Listener = New-AzApplicationGatewayHttpListener -Name "$aksClusterName-listener" -Protocol "Http" -FrontendIpConfiguration $FrontEndIpConfig -FrontendPort $FrontEndPort
         $Rule = New-AzApplicationGatewayRequestRoutingRule -Name "$aksClusterName-routing-rule01" -RuleType basic -BackendHttpSettings $PoolSetting -HttpListener $Listener -BackendAddressPool $Pool -Priority 200
