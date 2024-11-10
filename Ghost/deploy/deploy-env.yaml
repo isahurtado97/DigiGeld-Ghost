@@ -65,7 +65,7 @@ jobs:
                   "root-password"
                   "GhosDBUser"
                   "xxxxsss"
-                  ${{ parameters.azureSubscription }}
+                  "${{ parameters.azureSubscription }}"
             #Enable Add-Ons and extra
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
