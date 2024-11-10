@@ -84,7 +84,7 @@ function Deploy-SecurityConfig {
     # Step 1: Azure Application Gateway
     Write-Host "Checking if Azure Application Gateway exists..."
     $appGateway = Get-AzApplicationGateway -ResourceGroupName $resourceGroupName -Name "$aksClusterName-gw" -ErrorAction SilentlyContinue
-    if ($keyvault) {
+    if ($appGateway) {
         Write-Host "Resource $resourceGroupName-vault already exists."
     } else {
         $Subnet = New-AzVirtualNetworkSubnetConfig -Name "$aksClusterName-sn" -AddressPrefix 10.0.0.0/24
