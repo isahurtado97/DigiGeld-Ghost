@@ -130,11 +130,6 @@ process {
     # Deploy Create-LogAnalyticsWorkspace if not exists
     Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName
     
-    # Deploy Azure Key Vault
-    Create-AzKeyvault -resourceGroupName $resourceGroupName -Location $location
-    Write-Host "Setting secret in Azure Key Vault..."
-    Set-AzKeyVaultSecret -VaultName "$resourceGroupName-vault" -Name "mysql-password" -SecretValue (ConvertTo-SecureString $mysqlPassword -AsPlainText -Force)
-
     #Deploy Security Configuration
     Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
     
