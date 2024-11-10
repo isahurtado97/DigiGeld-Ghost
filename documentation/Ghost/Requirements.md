@@ -1,3 +1,2 @@
 - service connection
 - az ad sp create-for-rbac --name "<YourServicePrincipalName>" --role Contributor --scopes /subscriptions/<SubscriptionID>
-- ![[Pasted image 20241109233134.png]]

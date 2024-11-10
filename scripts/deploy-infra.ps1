@@ -3,8 +3,7 @@ param(
     [string]$resourceGroupName,
     [string]$location,
     [string]$acrName,
-    [string]$aksClusterName,
-    [string]$azuresubscription
+    [string]$aksClusterName
 )
 begin{
     function Ensure-AzModule {
@@ -40,6 +39,52 @@ begin{
         }
 
     }
+    function Create-AzContainerRegistry {
+        param(
+            [string]$resourceGroupName,
+            [string]$location,
+            [string]$acrName
+        )
+        # Check if Azure Container Registry (ACR) exists
+        $acr = Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName -ErrorAction SilentlyContinue
+        if (-not $acr) {
+            Write-Host "Creating Azure Container Registry..."
+            New-AzContainerRegistry `
+                -ResourceGroupName $resourceGroupName `
+                -RegistryName $acrName `
+                -Sku 'Basic' `
+                -Location $location
+        } else {
+            Write-Host "Azure Container Registry '$acrName' already exists."
+        }
+    }
+    function Create-LogAnalyticsWorkspace {
+        param(
+            [string]$resourceGroupName,
+            [string]$location,
+            [string]$acrName,
+            [string]$aksClusterName
+        )
+        # Get the ACR resource ID (used for AKS integration)
+        $acrResourceId = (Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName).Id
+        # Check if Log Analytics Workspace exists
+        $workspace = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroupName -Name "$aksClusterName-Workspace" -ErrorAction SilentlyContinue
+        if ($workspace) {
+            Write-Host "Log Analytics Workspace '$aksClusterName-Workspace' already exists."
+        } else {
+            # Create Log Analytics Workspace
+            Write-Host "Creating Log Analytics Workspace: $aksClusterName-Workspace"
+            $workspace = New-AzOperationalInsightsWorkspace `
+                -ResourceGroupName $ResourceGroupName `
+                -Name "$aksClusterName-Workspace" `
+                -Location $location `
+                -Sku $Sku `
+                -RetentionInDays 30 # Optional: Adjust retention as needed
+
+            Write-Host "Log Analytics Workspace created successfully."
+        }
+    }
+
 }
 process {
     # Ensure Az module is installed and imported
@@ -47,63 +92,11 @@ process {
 
     # Create Resource Group if not exists
     Create-AzResorceGroup -ResourceGroupName $ResourceGroupName -Location $location   
+    
+    # Create AzContainerRegistry if not exists
+    Create-AzContainerRegistry -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName
+    
+    # Create Create-LogAnalyticsWorkspace if not exists
+    Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName
 
-    # Check if Azure Container Registry (ACR) exists
-    $acr = Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName -ErrorAction SilentlyContinue
-    if (-not $acr) {
-        Write-Host "Creating Azure Container Registry..."
-        New-AzContainerRegistry `
-            -ResourceGroupName $resourceGroupName `
-            -RegistryName $acrName `
-            -Sku 'Basic' `
-            -Location $location
-    } else {
-        Write-Host "Azure Container Registry '$acrName' already exists."
-    }
-
-    # Get the ACR resource ID (used for AKS integration)
-    $acrResourceId = (Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName).Id
-    # Check if Log Analytics Workspace exists
-    $workspace = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroupName -Name "$aksClusterName-Workspace" -ErrorAction SilentlyContinue
-    if ($workspace) {
-        Write-Host "Log Analytics Workspace '$aksClusterName-Workspace' already exists."
-        $workspaceId = $workspace.ResourceId
-    } else {
-        # Create Log Analytics Workspace
-        Write-Host "Creating Log Analytics Workspace: $aksClusterName-Workspace"
-        $workspace = New-AzOperationalInsightsWorkspace `
-            -ResourceGroupName $ResourceGroupName `
-            -Name "$aksClusterName-Workspace" `
-            -Location $Location `
-            -Sku $Sku `
-            -RetentionInDays 30 # Optional: Adjust retention as needed
-
-        Write-Host "Log Analytics Workspace created successfully."
-        $workspaceId = $workspace.ResourceId
-    }
-    # Check if AKS Cluster exists
-    $Resourceid=(get-azresourcegroup $resourceGroupName )
-    $identity = Get-AzUserAssignedIdentity -ResourceGroupName $resourceGroupName  -Name $aksClusterName 
-    $aksCluster = Get-AzAksCluster -ResourceGroupName $resourceGroupName -Name $aksClusterName -ErrorAction SilentlyContinue
-    if (-not $aksCluster) {
-        Write-Host "Creating AKS Cluster..."
-        New-AzAksCluster `
-            -ResourceGroupName $resourceGroupName `
-            -Name $aksClusterName `
-            -NodeCount 3 `
-            -NodeVmSize "Standard_DS2_v2" `
-            -AddOnNameToBeEnabled  "Monitoring" `
-            - WorkspaceResourceId  $workspaceId `
-            -EnableNodeAutoScaling `
-            -NodeMinCount 1 `
-            -NodeMaxCount 5 `
-            -AcrNameToAttach $acrName `
-            -Location $location `
-            -SshKeyValue '/home/isa/.ssh/id_rsa' `
-            -AssignIdentity $identity.Id
-    } else {
-        Write-Host "AKS Cluster '$aksClusterName' already exists."
-    }
-    Write-Host "Script execution completed."
-    #az aks enable-addons --addons monitoring --resource-group $ResourceGroupName --name $AksClusterName
 }

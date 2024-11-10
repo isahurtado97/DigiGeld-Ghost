@@ -27,10 +27,10 @@ jobs:
       runOnce:
         deploy:
           steps:
-            # Deploy Infrastructure
+            # Deploy Infrastructure 
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: Deploying Infrastructure
+              displayName: Deploying Infrastructure required resources
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
                 ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
@@ -41,6 +41,16 @@ jobs:
                   -aksClusterName ${{ parameters.cluster_name }}
                 azurePowerShellVersion: LatestVersion
                 pwsh: true
+            # Deploy aks cluster
+            - task: Bash@3
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: Deploying aks cluster
+              inputs:
+                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-aks.sh'
+                arguments: >
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.acr_name }}
+                  ${{ parameters.cluster_name }}
             # Customize ghost-deployment.yaml file
             - task: AzurePowerShell@5
               condition: eq(variables['deployApp'], 'true')
@@ -54,7 +64,6 @@ jobs:
                   -password "xxxsss" 
                   -image "${{ parameters.acr_name }}.azurecr.io/ghost-app:${{ parameters.build_id }}"
                 pwsh: true
-
             # Deploy Ghost Image
             - task: Bash@3
               condition: eq(variables['deployApp'], 'true')
