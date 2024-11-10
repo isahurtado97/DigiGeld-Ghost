@@ -15,16 +15,21 @@ keyVault=$(az keyvault show --name "$clusterName-vault" --resource-group "$resou
 
 if [ -z "$keyVault" ]; then
     echo "Key Vault '$clusterName' does not exist. Creating it..."
-    az keyvault create --name "$clusterName-vault" --resource-group "$resourceGroup" --location "$location" --enable-rbac-authorization
+    az keyvault create --name "$clusterName-vault" --resource-group "$resourceGroup" --location "$location" --enable-rbac-authorization --enable-managed-identity
 else
     echo "Key Vault '$clusterName-vault' already exists."
 fi
 
 #Create service principal role asignments
+identityObjectId=$(az keyvault show --name "$clusterName-vault" --query "properties.identity.principalId" -o tsv)
+az role assignment create \
+  --assignee $identityObjectId \
+  --role "Key Vault Contributor" \
+  --scope "/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.KeyVault/vaults/$clusterName-vault"
+
 subscription=$(az account show --query "id" -o tsv)
-#az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes "/subscriptions/$subscription"
+az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes "/subscriptions/$subscription"
 id=$(az ad sp create-for-rbac --name "$Service_Principal_Name"  --query "appId" -o tsv)
-#az ad sp create-for-rbac --name $clusterName --role Contributor --scopes "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
 az role assignment create --assignee-object-id $id  --role "Key Vault Secrets Officer"  --assignee-principal-type ServicePrincipal --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
 
 # Define secrets
