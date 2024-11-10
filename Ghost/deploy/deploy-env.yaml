@@ -33,7 +33,7 @@ jobs:
             #  displayName: "Deploying Infrastructure: Pre-requisites"
             #  inputs:
             #    azureSubscription: ${{ parameters.azureSubscription }}
-            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-infra.ps1'
+            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
             #    ScriptArguments: >
             #      -resourceGroupName ${{ parameters.resource_group }}
             #      -location ${{ parameters.location }}
@@ -47,7 +47,7 @@ jobs:
             #  condition: eq(variables['deployInfra'], 'true')
             #  displayName: "Deploying Infrastructure: aks cluster"
             #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-aks.sh'
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
             #    arguments: >
             #      ${{ parameters.resource_group }}
             #      ${{ parameters.acr_name }}
@@ -57,7 +57,7 @@ jobs:
             #  condition: eq(variables['deployInfra'], 'true')
             #  displayName: "Deploying Infrastructure: Azure Key Vaul"
             #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/keyvault.sh'
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
             #    arguments: >
             #      ${{ parameters.cluster_name }}
             #      ${{ parameters.resource_group }}
@@ -66,7 +66,7 @@ jobs:
             #      "GhosDBUser"
             #      "xxxxsss"
             #      "${{ parameters.azureSubscription }}"
-            #Deploy Security and Extra AddOn
+            #Deploy Security and Extras
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
               displayName: 'Deploying Infrastructure: Security and Extras'
@@ -86,7 +86,7 @@ jobs:
               displayName: Customizing ghost-deployment.yaml file
               inputs:
                 targetType: 'filePath'
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/setup-ghost-file.ps1'
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/setup-ghost-file.ps1'
                 arguments: >
                   -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/${{ parameters.cluster_name }}.yaml"
@@ -98,7 +98,7 @@ jobs:
               condition: eq(variables['deployApp'], 'true')
               displayName: Deploying Ghost Image
               inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/ghost-deployment.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/ghost-deployment.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
