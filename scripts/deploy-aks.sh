@@ -43,3 +43,8 @@ if [[ -z $CLUSTER_EXIST ]]; then
 else
     echo "AKS cluster '$CLUSTER_NAME' already exists."
 fi
+#Deploy akv2k8s 
+helm repo add spv-charts https://charts.spvapi.no
+helm repo update
+helm install akv2k8s spv-charts/akv2k8s --namespace akv2k8s --create-namespace
+kubectl get pods -n akv2k8s
