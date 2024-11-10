@@ -11,7 +11,7 @@ Service_Principal_Name=$7
 
 #Create service principal role asignment
 subscription=$(az account show --query "id" -o tsv)
-az ad sp create-for-rbac --name $Service_Principal_Name --role Contributor --scopes /subscriptions/$subscription
+az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes /subscriptions/$subscription
 az ad sp create-for-rbac --name $clusterName --role Contributor --scopes /subscriptions/$subscription
 # Check if Key Vault exists
 echo "Checking if Key Vault '$clusterName' exists in resource group '$resourceGroup'..."
