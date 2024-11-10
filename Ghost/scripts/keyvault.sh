@@ -9,23 +9,23 @@ user=$5                # User secret
 password=$6            # Password secret
 Service_Principal_Name=$7
 
-#Create service principal role asignments
-subscription=$(az account show --query "id" -o tsv)
-#az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes "/subscriptions/$subscription"
-id=$(az ad sp create-for-rbac --name "$Service_Principal_Name"  --query "appId" -o tsv)
-#az ad sp create-for-rbac --name $clusterName --role Contributor --scopes "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
-az role assignment create --assignee-object-id $id  --role "Key Vault Secrets Officer"  --assignee-principal-type ServicePrincipal --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
-
 # Check if Key Vault exists
 echo "Checking if Key Vault '$clusterName-vault' exists in resource group '$resourceGroup'..."
 keyVault=$(az keyvault show --name "$clusterName-vault" --resource-group "$resourceGroup" 2>/dev/null)
 
 if [ -z "$keyVault" ]; then
     echo "Key Vault '$clusterName' does not exist. Creating it..."
-    az keyvault create --name "$clusterName-vault" --resource-group "$resourceGroup" --location "$location"
+    az keyvault create --name "$clusterName-vault" --resource-group "$resourceGroup" --location "$location" --enable-rbac-authorization
 else
     echo "Key Vault '$clusterName-vault' already exists."
 fi
+
+#Create service principal role asignments
+subscription=$(az account show --query "id" -o tsv)
+#az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes "/subscriptions/$subscription"
+id=$(az ad sp create-for-rbac --name "$Service_Principal_Name"  --query "appId" -o tsv)
+#az ad sp create-for-rbac --name $clusterName --role Contributor --scopes "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
+az role assignment create --assignee-object-id $id  --role "Key Vault Secrets Officer"  --assignee-principal-type ServicePrincipal --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
 
 # Define secrets
 declare -A secrets
