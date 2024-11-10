@@ -27,10 +27,10 @@ jobs:
       runOnce:
         deploy:
           steps:
-            # Deploy Infrastructure 
+            # Deploying Infrastructure: Pre-requisites.
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Pre-requisites"
+              displayName: "Deploying Infrastructure: Pre-requisites."
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
                 ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
@@ -42,20 +42,20 @@ jobs:
                   -basepath '$(Pipeline.Workspace)/artifacts/modules'
                 azurePowerShellVersion: LatestVersion
                 pwsh: true
-            # Deploy aks cluster
+            # Deploying Infrastructure: Aks Cluster.
             - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: aks cluster"
+              displayName: "Deploying Infrastructure: Aks Cluster."
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.acr_name }}
                   ${{ parameters.cluster_name }}
-            #Deploy Keyvault
+            # Deploying Infrastructure: Azure Key Vault.
             - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Azure Key Vault"
+              displayName: "Deploying Infrastructure: Azure Key Vault."
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
                 arguments: >
@@ -66,10 +66,10 @@ jobs:
                   "GhosDBUser"
                   "xxxxsss"
                   "${{ parameters.azureSubscription }}"
-            #Deploy Security and Extras
+            # Deploying Infrastructure: Security and Extras.
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: 'Deploying Infrastructure: Security and Extras'
+              displayName: 'Deploying Infrastructure: Security and Extras.'
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
@@ -80,10 +80,10 @@ jobs:
                   Write-Host "Enabling Azure Policy addon for Pod Security..."
                   Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                 azurePowerShellVersion: 'LatestVersion'
-            # Customize ghost-deployment.yaml file
+            # Deploying App: ghost-deployment.yaml file customize.
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
-              displayName: Customizing ghost-deployment.yaml file
+              displayName: "Deploying App: ghost-deployment.yaml file customize."
               inputs:
                 targetType: 'filePath'
                 filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/setup-ghost-file.ps1'
@@ -93,10 +93,10 @@ jobs:
                   -password "xxxsss" 
                   -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
                 pwsh: true
-            # Deploy Ghost Image
+            # Deploying App: Push Ghost Image to AKS.
             - task: Bash@3
               condition: eq(variables['deployApp'], 'true')
-              displayName: Deploying Ghost Image
+              displayName: "Deploying App: Push Ghost Image to AKS."
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/ghost-deployment.sh'
                 arguments: >

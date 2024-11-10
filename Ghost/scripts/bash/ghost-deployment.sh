@@ -29,6 +29,35 @@ else
 fi
 #Configure and create ghost deployment
 kubectl apply -f $IMAGE_YAML
-#Enable AKS addons
-appGatewayId=$(az network application-gateway show --name "$CLUSTER_NAME-appgw" --resource-group "$CLUSTER_NAME" --query "id" -o tsv)
-az aks enable-addons --resource-group $RESOURCE_GROUP --name "$CLUSTER_NAME" --addons ingress-appgw --appgw-id $appGatewayId
+#Enable AKS addons ingress
+# Check if ingress-appgw addon is already enabled
+addonEnabled=$(az aks show \
+  --resource-group $RESOURCE_GROUP \
+  --name $CLUSTER_NAME \
+  --query "addonProfiles.ingressApplicationGateway.enabled" -o tsv)
+
+if [ "$addonEnabled" == "true" ]; then
+    echo "The ingress-appgw addon is already enabled for cluster $CLUSTER_NAME."
+else
+    echo "Enabling ingress-appgw addon for cluster $CLUSTER_NAME..."
+
+    # Retrieve Application Gateway ID
+    appGatewayId=$(az network application-gateway show \
+      --name "$CLUSTER_NAME-appgw" \
+      --resource-group "$CLUSTER_NAME" \
+      --query "id" -o tsv)
+
+    if [ -z "$appGatewayId" ]; then
+        echo "Error: Application Gateway not found for $CLUSTER_NAME."
+        exit 1
+    fi
+
+    # Enable ingress-appgw addon
+    az aks enable-addons \
+      --resource-group $RESOURCE_GROUP \
+      --name $CLUSTER_NAME \
+      --addons ingress-appgw \
+      --appgw-id $appGatewayId
+
+    echo "ingress-appgw addon has been successfully enabled for cluster $CLUSTER_NAME."
+fi
