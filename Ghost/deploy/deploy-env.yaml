@@ -53,19 +53,19 @@ jobs:
             #      ${{ parameters.acr_name }}
             #      ${{ parameters.cluster_name }}
             #Deploy Keyvault
-            - task: Bash@3
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Azure Key Vaul"
-              inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/keyvault.sh'
-                arguments: >
-                  ${{ parameters.cluster_name }}
-                  ${{ parameters.resource_group }}
-                  ${{ parameters.location }}
-                  "root-password"
-                  "GhosDBUser"
-                  "xxxxsss"
-                  "${{ parameters.azureSubscription }}"
+            #- task: Bash@3
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: Azure Key Vaul"
+            #  inputs:
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/keyvault.sh'
+            #    arguments: >
+            #      ${{ parameters.cluster_name }}
+            #      ${{ parameters.resource_group }}
+            #      ${{ parameters.location }}
+            #      "root-password"
+            #      "GhosDBUser"
+            #      "xxxxsss"
+            #      "${{ parameters.azureSubscription }}"
             #Enable Add-Ons and extra
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
@@ -75,12 +75,14 @@ jobs:
                 ScriptType: 'InlineScript'
                 Inline: |
                   Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                  Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
+                  Deploy-SecurityConfig -resourceGroupName ${{ parameters.cluster_name }} -Location $location -aksClusterName ${{ parameters.cluster_name }}
                   # Enable addons
                   Write-Host "Enabling Azure Policy addon for Pod Security..."
-                  Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName AzurePolicy
+                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName AzurePolicy
                   Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
-                  Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
+                  $appGatewayName = "${{ parameters.cluster_name }}-appgwconfig"
+                  $appGatewayId = (Get-AzApplicationGateway | Where-Object { $_.Name -eq $appGatewayName }).Id
+                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName ingress-appgw -AppGatewayId $appGatewayId
                 azurePowerShellVersion: 'LatestVersion'
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
