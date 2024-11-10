@@ -71,7 +71,7 @@ jobs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
                 Inline: |
-                  Import-Module '$(Pipeline.Workspace)/artifacts/Ghost/deploy-infra.psm1'
+                  Import-Module '$(Pipeline.Workspace)/artifacts/Ghost/modules/deploy-infra.psm1'
                   Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
                   # Enable addons
                   Write-Host "Enabling Azure Policy addon for Pod Security..."

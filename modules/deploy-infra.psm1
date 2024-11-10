@@ -1,4 +1,3 @@
-
 function Ensure-AzModule {
     try {
         # Try to import the Az module
@@ -62,7 +61,7 @@ function Create-LogAnalyticsWorkspace {
     # Check if Log Analytics Workspace exists
     $workspace = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroupName -Name "$aksClusterName-Workspace" -ErrorAction SilentlyContinue
     if ($workspace) {
-        Write-Host "Log Analytics Workspace '$aksClusterName-Workspace' already exists."
+        Write-Host "Log Analytics Workspace $aksClusterName-Workspace already exists."
     } else {
         # Create Log Analytics Workspace
         Write-Host "Creating Log Analytics Workspace: $aksClusterName-Workspace"

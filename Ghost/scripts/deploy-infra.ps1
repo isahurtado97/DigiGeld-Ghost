@@ -2,6 +2,7 @@ param(
     [string]$ResourceGroupName,
     [string]$acrName,
     [string]$location,
+    [string]$aksClusterName
     [string]$basepath
 )
 process {
