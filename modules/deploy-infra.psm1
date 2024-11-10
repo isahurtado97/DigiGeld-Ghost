@@ -1,12 +1,4 @@
-# Variables
-param(
-    [string]$resourceGroupName,
-    [string]$location,
-    [string]$acrName,
-    [string]$aksClusterName,
-    [string]$mysqlPassword
-)
-begin{
+
     function Ensure-AzModule {
         try {
             # Try to import the Az module
@@ -98,7 +90,6 @@ begin{
         if ($keyvault) {
             Write-Host "Resource $resourceGroupName-vault already exists."
         } else {
-        
             $Subnet = New-AzVirtualNetworkSubnetConfig -Name "$aksClusterName-sn" -AddressPrefix 10.0.0.0/24
             $VNet = New-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName -Location "northeurope" -AddressPrefix 10.0.0.0/16 -Subnet $Subnet
             $VNet = Get-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName 
@@ -116,26 +107,4 @@ begin{
             $Gateway = New-AzApplicationGateway -Name "$aksClusterName-appgwconfig"  -ResourceGroupName $resourceGroupName -Location "northeurope" -BackendAddressPools $Pool -BackendHttpSettingsCollection $PoolSetting -FrontendIpConfigurations $FrontEndIpConfig  -GatewayIpConfigurations $GatewayIpConfig -FrontendPorts $FrontEndPort -HttpListeners $Listener -RequestRoutingRules $Rule -Sku $Sku
         }
     }
-}
-process {
-    # Ensure Az module is installed and imported
-    Ensure-AzModule
-
-    # Deploy Resource Group if not exists
-    Create-AzResorceGroup -ResourceGroupName $ResourceGroupName -Location $location   
-    
-    # Deploy AzContainerRegistry if not exists
-    Create-AzContainerRegistry -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName
-    
-    # Deploy Create-LogAnalyticsWorkspace if not exists
-    Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName
-    
-    #Deploy Security Configuration
-    #Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
-    
-    # Enable addons
-    Write-Host "Enabling Azure Policy addon for Pod Security..."
-    #Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -Name AzurePolicy
-    Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
-    #Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
 }

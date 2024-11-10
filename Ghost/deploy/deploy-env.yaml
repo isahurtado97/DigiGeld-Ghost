@@ -28,25 +28,26 @@ jobs:
         deploy:
           steps:
             # Deploy Infrastructure 
-            #- task: AzurePowerShell@5
-            #  condition: eq(variables['deployInfra'], 'true')
-            #  displayName: "Deploying Infrastructure: Pre-requisites"
-            #  inputs:
-            #    azureSubscription: ${{ parameters.azureSubscription }}
-            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
-            #    ScriptArguments: >
-            #      -resourceGroupName ${{ parameters.resource_group }}
-            #      -location ${{ parameters.location }}
-            #      -acrName ${{ parameters.acr_name }}
-            #      -aksClusterName ${{ parameters.cluster_name }}
-            #    azurePowerShellVersion: LatestVersion
-            #    pwsh: true
+            - task: AzurePowerShell@5
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: "Deploying Infrastructure: Pre-requisites"
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-infra.ps1'
+                ScriptArguments: >
+                  -resourceGroupName ${{ parameters.resource_group }}
+                  -location ${{ parameters.location }}
+                  -acrName ${{ parameters.acr_name }}
+                  -aksClusterName ${{ parameters.cluster_name }}
+                  -basepath '$(Pipeline.Workspace)/artifacts/modules'
+                azurePowerShellVersion: LatestVersion
+                pwsh: true
             ## Deploy aks cluster
             #- task: Bash@3
             #  condition: eq(variables['deployInfra'], 'true')
             #  displayName: "Deploying Infrastructure: aks cluster"
             #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-aks.sh'
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/deploy-aks.sh'
             #    arguments: >
             #      ${{ parameters.resource_group }}
             #      ${{ parameters.acr_name }}
@@ -64,16 +65,30 @@ jobs:
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "root-password" --value "xxxssss"
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "user" --value "ghostdbuser"
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "password" --value "xxxssss"
+            - task: AzurePowerShell@5
+              displayName: 'Enable AKS Add-ons'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
+                ScriptType: 'InlineScript'
+                Inline: |
+                  Import-Module '$(Pipeline.Workspace)/artifacts/Ghost/deploy-infra.psm1'
+                  Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
+                  # Enable addons
+                  Write-Host "Enabling Azure Policy addon for Pod Security..."
+                  Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName AzurePolicy
+                  Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
+                  Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
+                azurePowerShellVersion: 'LatestVersion'
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
               displayName: Customizing ghost-deployment.yaml file
               inputs:
                 targetType: 'filePath'
-                filePath: '$(Pipeline.Workspace)/artifacts/scripts/setup-ghost-file.ps1'
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/setup-ghost-file.ps1'
                 arguments: >
-                  -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
-                  -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml"
+                  -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/ghost-deployment.yaml" 
+                  -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/${{ parameters.cluster_name }}.yaml"
                   -password "xxxsss" 
                   -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
                 pwsh: true
@@ -82,9 +97,9 @@ jobs:
               condition: eq(variables['deployApp'], 'true')
               displayName: Deploying Ghost Image
               inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/scripts/ghost-deployment.sh'
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/ghost-deployment.sh'
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
-                  "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml"
+                  "$(Pipeline.Workspace)/artifacts/Ghost/templates/${{ parameters.cluster_name }}.yaml"
                   
