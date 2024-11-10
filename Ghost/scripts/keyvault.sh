@@ -14,7 +14,7 @@ subscription=$(az account show --query "id" -o tsv)
 #az ad sp create-for-rbac --name "$Service_Principal_Name" --role Contributor --scopes "/subscriptions/$subscription"
 id=$(az ad sp create-for-rbac --name "$Service_Principal_Name"  --query "appId" -o tsv)
 #az ad sp create-for-rbac --name $clusterName --role Contributor --scopes "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
-az role assignment create --assignee-object-id $id  --role "Key Vault Secrets Officer" --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
+az role assignment create --assignee-object-id $id  --role "Key Vault Secrets Officer"  --assignee-principal-type ServicePrincipal --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
 
 # Check if Key Vault exists
 echo "Checking if Key Vault '$clusterName-vault' exists in resource group '$resourceGroup'..."
