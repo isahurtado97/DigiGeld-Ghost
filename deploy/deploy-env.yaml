@@ -28,29 +28,29 @@ jobs:
         deploy:
           steps:
             # Deploy Infrastructure 
-            - task: AzurePowerShell@5
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Pre-requisites"
-              inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
-                ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
-                ScriptArguments: >
-                  -resourceGroupName ${{ parameters.resource_group }}
-                  -location ${{ parameters.location }}
-                  -acrName ${{ parameters.acr_name }}
-                  -aksClusterName ${{ parameters.cluster_name }}
-                azurePowerShellVersion: LatestVersion
-                pwsh: true
-            # Deploy aks cluster
-            - task: Bash@3
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: aks cluster"
-              inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-aks.sh'
-                arguments: >
-                  ${{ parameters.resource_group }}
-                  ${{ parameters.acr_name }}
-                  ${{ parameters.cluster_name }}
+            #- task: AzurePowerShell@5
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: Pre-requisites"
+            #  inputs:
+            #    azureSubscription: ${{ parameters.azureSubscription }}
+            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
+            #    ScriptArguments: >
+            #      -resourceGroupName ${{ parameters.resource_group }}
+            #      -location ${{ parameters.location }}
+            #      -acrName ${{ parameters.acr_name }}
+            #      -aksClusterName ${{ parameters.cluster_name }}
+            #    azurePowerShellVersion: LatestVersion
+            #    pwsh: true
+            ## Deploy aks cluster
+            #- task: Bash@3
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: aks cluster"
+            #  inputs:
+            #    filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-aks.sh'
+            #    arguments: >
+            #      ${{ parameters.resource_group }}
+            #      ${{ parameters.acr_name }}
+            #      ${{ parameters.cluster_name }}
             #Deploy Keyvault
             - task: AzureCLI@2
               condition: eq(variables['deployInfra'], 'true')
@@ -60,7 +60,7 @@ jobs:
                 scriptType: 'bash'
                 scriptLocation: 'inlineScript'
                 inlineScript: |
-                  az keyvault create --name ${{ parameters.cluster_name }} --resource-group ${{ parameters.resource_group }} --location norteurope
+                  az keyvault create --name ${{ parameters.cluster_name }} --resource-group ${{ parameters.resource_group }} --location ${{ parameters.location }}
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "root-password" --value "xxxssss"
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "user" --value "ghostdbuser"
                   az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "password" --value "xxxssss"
