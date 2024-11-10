@@ -30,7 +30,7 @@ jobs:
             # Deploy Infrastructure 
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: Deploying Infrastructure required resources
+              displayName: "Deploying Infrastructure: Pre-requisites"
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}
                 ScriptPath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-infra.ps1'
@@ -44,7 +44,7 @@ jobs:
             # Deploy aks cluster
             - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
-              displayName: Deploying aks cluster
+              displayName: "Deploying Infrastructure: aks cluster"
               inputs:
                 filePath: '$(Pipeline.Workspace)/artifacts/scripts/deploy-aks.sh'
                 arguments: >

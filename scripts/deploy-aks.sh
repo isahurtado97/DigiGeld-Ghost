@@ -11,7 +11,11 @@ fi
 RESOURCE_GROUP=$1
 ACR_NAME=$2
 CLUSTER_NAME=${3:-"example:dg-aks-acc"} # Default value if not provided
-
+#Workspace Id
+WORKSPACEID=$(az monitor log-analytics workspace show \
+    --resource-group $RESOURCE_GROUP \
+    --workspace-name "$CLUSTER_NAME-Workspace" \
+    --query id --output tsv)
 # Create AKS Cluster and Attach ACR
 echo "Creating AKS Cluster..."
 az aks create \
@@ -25,4 +29,5 @@ az aks create \
   --enable-addons monitoring \
   --enable-cluster-autoscaler \
   --min-count 1 \
-  --max-count 5
+  --max-count 5 \
+  --workspace-resource-id $WORKSPACEID
