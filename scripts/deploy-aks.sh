@@ -27,6 +27,7 @@ if [[ -z $CLUSTER_EXIST ]]; then
     echo "Creating AKS Cluster..."
     az aks create \
       --resource-group $RESOURCE_GROUP \
+      --node-resource-group $CLUSTER_NAME \
       --name $CLUSTER_NAME \
       --node-count 3 \
       --node-vm-size "Standard_DS2_v2" \

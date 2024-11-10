@@ -51,6 +51,18 @@ jobs:
                   ${{ parameters.resource_group }}
                   ${{ parameters.acr_name }}
                   ${{ parameters.cluster_name }}
+            #Deploy Keyvault
+            - task: AzureCLI@2
+              displayName: 'Create Key Vault and Add Secrets'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}  # Replace with your service connection name
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az keyvault create --name ${{ parameters.cluster_name }} --resource-group ${{ parameters.resource_group }} --location norteurope
+                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "root-password" --value "xxxssss"
+                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "user" --value "ghostdbuser"
+                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "password" --value "xxxssss"
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
