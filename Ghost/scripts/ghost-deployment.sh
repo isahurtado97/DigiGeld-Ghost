@@ -30,4 +30,4 @@ fi
 #Configure and create ghost deployment
 kubectl apply -f $IMAGE_YAML
 appGatewayId=$(az network application-gateway show --name "$CLUSTER_NAME-appgw" --resource-group "$CLUSTER_NAME" --query "id" -o tsv)
-az aks enable-addons --resource-group "my-resource-group" --name "my-aks-cluster" --addons ingress-appgw --appgw-id $appGatewayId
+az aks enable-addons --resource-group $RESOURCE_GROUP --name "$CLUSTER_NAME" --addons ingress-appgw --appgw-id $appGatewayId
