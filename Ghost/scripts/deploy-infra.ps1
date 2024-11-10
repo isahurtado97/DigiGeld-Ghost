@@ -18,4 +18,8 @@ process {
     
     # Deploy Create-LogAnalyticsWorkspace if not exists
     Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName -sku 'Standard'
+
+    #Wait for all to be deploy and recognized
+    Start-Sleep -Seconds 120
+    Write-host "All is deploy and recognized"
 }

@@ -53,20 +53,22 @@ jobs:
                   ${{ parameters.acr_name }}
                   ${{ parameters.cluster_name }}
             #Deploy Keyvault
-            - task: AzureCLI@2
+            - task: Bash@3
               condition: eq(variables['deployInfra'], 'true')
-              displayName: 'Create Key Vault and Add Secrets'
+              displayName: "Deploying Infrastructure: aks cluster"
               inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}  # Replace with your service connection name
-                scriptType: 'bash'
-                scriptLocation: 'inlineScript'
-                inlineScript: |
-                  az keyvault create --name ${{ parameters.cluster_name }} --resource-group ${{ parameters.resource_group }} --location ${{ parameters.location }}
-                  az role assignment create --assignee-object-id 44c35e1f-3655-4595-8d04-52095c902681 --role "Key Vault Secrets Officer" --scope /subscriptions/720ee0cb-85b8-47f1-a0d7-ef73d767f24b/resourcegroups/${{ parameters.resource_group }}/providers/microsoft.keyvault/vaults/${{ parameters.cluster_name }}
-                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "root-password" --value "xxxssss"
-                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "user" --value "ghostdbuser"
-                  az keyvault secret set --vault-name ${{ parameters.cluster_name }}  --name "password" --value "xxxssss"
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/keyvault.sh'
+                arguments: >
+                  ${{ parameters.cluster_name }}
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.location }}
+                  "root-password"
+                  "GhosDBUser"
+                  "xxxxsss"
+                  ${{ parameters.azureSubscription }}
+            #Enable Add-Ons and extra
             - task: AzurePowerShell@5
+              condition: eq(variables['deployInfra'], 'true')
               displayName: 'Enable AKS Add-ons'
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
