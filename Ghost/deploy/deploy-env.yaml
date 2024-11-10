@@ -82,7 +82,7 @@ jobs:
                   Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
                   $appGatewayName = "${{ parameters.cluster_name }}-appgw"
                   $appGatewayId = (Get-AzApplicationGateway -Name 'dg-aks-acc-appgw').Id 
-                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name ingress-appgw -AppGatewayId $appGatewayId
+                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name ingress-appgw -IngressApplicationGatewayId $appGatewayId
                 azurePowerShellVersion: 'LatestVersion'
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
