@@ -99,7 +99,7 @@ function Deploy-SecurityConfig {
         $PublicIp = New-AzPublicIpAddress -ResourceGroupName $resourceGroupName -Name "$aksClusterName-pip" -Location "northeurope" -AllocationMethod "Static" -sku Standard
         $FrontEndIpConfig = New-AzApplicationGatewayFrontendIPConfig -Name "$aksClusterName-feconfig" -PublicIPAddress $PublicIp
         $Listener = New-AzApplicationGatewayHttpListener -Name "$aksClusterName-listener" -Protocol "Http" -FrontendIpConfiguration $FrontEndIpConfig -FrontendPort $FrontEndPort
-        $Rule = New-AzApplicationGatewayRequestRoutingRule -Name "$aksClusterName-routing-rule01" -RuleType basic -BackendHttpSettings $PoolSetting -HttpListener $Listener -BackendAddressPool $Pool
+        $Rule = New-AzApplicationGatewayRequestRoutingRule -Name "$aksClusterName-routing-rule01" -RuleType basic -BackendHttpSettings $PoolSetting -HttpListener $Listener -BackendAddressPool $Pool -Priority 200
         $Sku = New-AzApplicationGatewaySku -Name "Standard_v2" -Tier Standard_v2 -Capacity 2
         $Gateway = New-AzApplicationGateway -Name "$aksClusterName-appgwconfig"  -ResourceGroupName $resourceGroupName -Location "northeurope" -BackendAddressPools $Pool -BackendHttpSettingsCollection $PoolSetting -FrontendIpConfigurations $FrontEndIpConfig  -GatewayIpConfigurations $GatewayIpConfig -FrontendPorts $FrontEndPort -HttpListeners $Listener -RequestRoutingRules $Rule -Sku $Sku
     }
