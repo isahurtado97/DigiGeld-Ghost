@@ -27,45 +27,45 @@ jobs:
       runOnce:
         deploy:
           steps:
-            ## Deploy Infrastructure 
-            #- task: AzurePowerShell@5
-            #  condition: eq(variables['deployInfra'], 'true')
-            #  displayName: "Deploying Infrastructure: Pre-requisites"
-            #  inputs:
-            #    azureSubscription: ${{ parameters.azureSubscription }}
-            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
-            #    ScriptArguments: >
-            #      -resourceGroupName ${{ parameters.resource_group }}
-            #      -location ${{ parameters.location }}
-            #      -acrName ${{ parameters.acr_name }}
-            #      -aksClusterName ${{ parameters.cluster_name }}
-            #      -basepath '$(Pipeline.Workspace)/artifacts/modules'
-            #    azurePowerShellVersion: LatestVersion
-            #    pwsh: true
-            ## Deploy aks cluster
-            #- task: Bash@3
-            #  condition: eq(variables['deployInfra'], 'true')
-            #  displayName: "Deploying Infrastructure: aks cluster"
-            #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
-            #    arguments: >
-            #      ${{ parameters.resource_group }}
-            #      ${{ parameters.acr_name }}
-            #      ${{ parameters.cluster_name }}
+            # Deploy Infrastructure 
+            - task: AzurePowerShell@5
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: "Deploying Infrastructure: Pre-requisites"
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
+                ScriptArguments: >
+                  -resourceGroupName ${{ parameters.resource_group }}
+                  -location ${{ parameters.location }}
+                  -acrName ${{ parameters.acr_name }}
+                  -aksClusterName ${{ parameters.cluster_name }}
+                  -basepath '$(Pipeline.Workspace)/artifacts/modules'
+                azurePowerShellVersion: LatestVersion
+                pwsh: true
+            # Deploy aks cluster
+            - task: Bash@3
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: "Deploying Infrastructure: aks cluster"
+              inputs:
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
+                arguments: >
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.acr_name }}
+                  ${{ parameters.cluster_name }}
             #Deploy Keyvault
-            #- task: Bash@3
-            #  condition: eq(variables['deployInfra'], 'true')
-            #  displayName: "Deploying Infrastructure: Azure Key Vaul"
-            #  inputs:
-            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
-            #    arguments: >
-            #      ${{ parameters.cluster_name }}
-            #      ${{ parameters.resource_group }}
-            #      ${{ parameters.location }}
-            #      "root-password"
-            #      "GhosDBUser"
-            #      "xxxxsss"
-            #      "${{ parameters.azureSubscription }}"
+            - task: Bash@3
+              condition: eq(variables['deployInfra'], 'true')
+              displayName: "Deploying Infrastructure: Azure Key Vault"
+              inputs:
+                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
+                arguments: >
+                  ${{ parameters.cluster_name }}
+                  ${{ parameters.resource_group }}
+                  ${{ parameters.location }}
+                  "root-password"
+                  "GhosDBUser"
+                  "xxxxsss"
+                  "${{ parameters.azureSubscription }}"
             #Deploy Security and Extras
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
