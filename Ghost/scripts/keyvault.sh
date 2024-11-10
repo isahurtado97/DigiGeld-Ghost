@@ -30,11 +30,14 @@ existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --nam
 if [ -z "$existingSecret" ]; then
     echo "Creating secret 'root-password'"
     az keyvault secret set --vault-name "$clusterName-vault" --name "root-password" --value "$root_password"
+fi
 existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "user" 2>/dev/null)
 if [ -z "$existingSecret" ]; then
     echo "Creating secret 'user'"
     az keyvault secret set --vault-name "$clusterName-vault" --name "user" --value "$user"
+fi
 existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "password" 2>/dev/null)
 if [ -z "$existingSecret" ]; then
     echo "Creating secret 'password'"
     az keyvault secret set --vault-name "$clusterName-vault" --name "password" --value "$password"
+fi
