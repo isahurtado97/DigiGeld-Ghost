@@ -131,11 +131,11 @@ process {
     Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName
     
     #Deploy Security Configuration
-    Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
+    #Deploy-SecurityConfig -resourceGroupName $aksClusterName -Location $location -aksClusterName $aksClusterName
     
     # Enable addons
     Write-Host "Enabling Azure Policy addon for Pod Security..."
     Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -Name AzurePolicy
     Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
-    Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
+    #Enable-AzAksAddon -ResourceGroupName $resourceGroupName -ClusterName $aksClusterName -AddonName ingress-appgw -AppGatewayId $appGatewayId
 }
