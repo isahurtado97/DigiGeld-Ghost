@@ -26,25 +26,15 @@ id=$(az ad sp create-for-rbac --name "$Service_Principal_Name"  --query "appId" 
 az role assignment create --assignee-object-id $id  --role "Key Vault Secrets officer"  --assignee-principal-type ServicePrincipal --scope "/subscriptions/$subscription/resourcegroups/$resourceGroup/providers/microsoft.keyvault/vaults/$clusterName-vault"
 
 # Define secrets
-declare -A secrets
-secrets=(
-    ["root-password"]="$root_password"
-    ["user"]="$user"
-    ["password"]="$password"
-)
-
-# Check and create secrets
-echo "Checking and creating secrets in Key Vault '$clusterName-vault'..."
-for secretName in "${!secrets[@]}"; do
-    secretValue="${secrets[$secretName]}"
-    existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "$secretName" 2>/dev/null)
-    
-    if [ -z "$existingSecret" ]; then
-        echo "Creating secret '$secretName'..."
-        az keyvault secret set --vault-name "$clusterName-vault" --name "$secretName" --value "$secretValue"
-    else
-        echo "Secret '$secretName' already exists."
-    fi
-done
-
-echo "Key Vault configuration complete."
+existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "root-password" 2>/dev/null)
+if [ -z "$existingSecret" ]; then
+    echo "Creating secret 'root-password'"
+    az keyvault secret set --vault-name "$clusterName-vault" --name "root-password" --value "$root_password"
+existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "user" 2>/dev/null)
+if [ -z "$existingSecret" ]; then
+    echo "Creating secret 'user'"
+    az keyvault secret set --vault-name "$clusterName-vault" --name "user" --value "$user"
+existingSecret=$(az keyvault secret show --vault-name "$clusterName-vault" --name "password" 2>/dev/null)
+if [ -z "$existingSecret" ]; then
+    echo "Creating secret 'password'"
+    az keyvault secret set --vault-name "$clusterName-vault" --name "password" --value "$password"
