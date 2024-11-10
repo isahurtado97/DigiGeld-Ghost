@@ -7,7 +7,7 @@ location=$3             # Azure region
 root_password=$4        # Root password secret
 user=$5                # User secret
 password=$6            # Password secret
-$Service_Principal_Name = $7
+Service_Principal_Name=$7
 
 #Create service principal role asignment
 subscription=$(az account show --query "id" -o tsv)
