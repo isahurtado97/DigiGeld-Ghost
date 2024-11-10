@@ -53,6 +53,7 @@ jobs:
                   ${{ parameters.cluster_name }}
             #Deploy Keyvault
             - task: AzureCLI@2
+              condition: eq(variables['deployInfra'], 'true')
               displayName: 'Create Key Vault and Add Secrets'
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }}  # Replace with your service connection name
