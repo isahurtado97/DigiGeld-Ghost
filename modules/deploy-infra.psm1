@@ -88,7 +88,7 @@ function Deploy-SecurityConfig {
         Write-Host "Resource $resourceGroupName-vault already exists."
     } else {
         $Subnet = New-AzVirtualNetworkSubnetConfig -Name "$aksClusterName-sn" -AddressPrefix 10.0.0.0/24
-        $VNet = New-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName -Location "northeurope" -AddressPrefix 10.0.0.0/16 -Subnet $Subnet
+        $VNet = New-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName -Location "northeurope" -AddressPrefix 10.0.0.0/16 -Subnet $Subnet -Force
         $VNet = Get-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName 
         $Subnet = Get-AzVirtualNetworkSubnetConfig -Name "$aksClusterName-sn"  -VirtualNetwork $VNet 
         $GatewayIPconfig = New-AzApplicationGatewayIPConfiguration -Name "$aksClusterName-gw-ip" -Subnet $Subnet
