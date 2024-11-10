@@ -62,7 +62,7 @@ jobs:
                   -filepath "$(Pipeline.Workspace)/artifacts/templates/ghost-deployment.yaml" 
                   -filefinalpath "$(Pipeline.Workspace)/artifacts/templates/${{ parameters.cluster_name }}.yaml"
                   -password "xxxsss" 
-                  -image "$(parameters.acr_name).azurecr.io/ghost-app:$(parameters.build_id)"
+                  -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
                 pwsh: true
             # Deploy Ghost Image
             - task: Bash@3
