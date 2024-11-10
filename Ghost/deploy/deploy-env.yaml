@@ -80,7 +80,7 @@ jobs:
                   Write-Host "Enabling Azure Policy addon for Pod Security..."
                   Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName AzurePolicy
                   Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
-                  $appGatewayName = "${{ parameters.cluster_name }}-appgwconfig"
+                  $appGatewayName = "${{ parameters.cluster_name }}-appgw"
                   $appGatewayId = (Get-AzApplicationGateway | Where-Object { $_.Name -eq $appGatewayName }).Id
                   Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName ingress-appgw -AppGatewayId $appGatewayId
                 azurePowerShellVersion: 'LatestVersion'

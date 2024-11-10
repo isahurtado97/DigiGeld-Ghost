@@ -83,7 +83,7 @@ function Deploy-SecurityConfig {
 
     # Step 1: Azure Application Gateway
     Write-Host "Checking if Azure Application Gateway exists..."
-    $appGateway = Get-AzApplicationGateway -ResourceGroupName $resourceGroupName -Name "$aksClusterName-gw" -ErrorAction SilentlyContinue
+    $appGateway = Get-AzApplicationGateway -ResourceGroupName $resourceGroupName -Name "$aksClusterName-appgw" -ErrorAction SilentlyContinue
     if ($appGateway) {
         Write-Host "Resource $resourceGroupName-vault already exists."
     } else {
@@ -101,6 +101,6 @@ function Deploy-SecurityConfig {
         $Listener = New-AzApplicationGatewayHttpListener -Name "$aksClusterName-listener" -Protocol "Http" -FrontendIpConfiguration $FrontEndIpConfig -FrontendPort $FrontEndPort
         $Rule = New-AzApplicationGatewayRequestRoutingRule -Name "$aksClusterName-routing-rule01" -RuleType basic -BackendHttpSettings $PoolSetting -HttpListener $Listener -BackendAddressPool $Pool -Priority 200
         $Sku = New-AzApplicationGatewaySku -Name "Standard_v2" -Tier Standard_v2 -Capacity 2
-        $Gateway = New-AzApplicationGateway -Name "$aksClusterName-appgwconfig"  -ResourceGroupName $resourceGroupName -Location "northeurope" -BackendAddressPools $Pool -BackendHttpSettingsCollection $PoolSetting -FrontendIpConfigurations $FrontEndIpConfig  -GatewayIpConfigurations $GatewayIpConfig -FrontendPorts $FrontEndPort -HttpListeners $Listener -RequestRoutingRules $Rule -Sku $Sku
+        $Gateway = New-AzApplicationGateway -Name "$aksClusterName-appgw"  -ResourceGroupName $resourceGroupName -Location "northeurope" -BackendAddressPools $Pool -BackendHttpSettingsCollection $PoolSetting -FrontendIpConfigurations $FrontEndIpConfig  -GatewayIpConfigurations $GatewayIpConfig -FrontendPorts $FrontEndPort -HttpListeners $Listener -RequestRoutingRules $Rule -Sku $Sku
     }
 }
