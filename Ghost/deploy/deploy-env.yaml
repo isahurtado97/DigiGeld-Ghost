@@ -78,11 +78,11 @@ jobs:
                   Deploy-SecurityConfig -resourceGroupName ${{ parameters.cluster_name }} -Location $location -aksClusterName ${{ parameters.cluster_name }}
                   # Enable addons
                   Write-Host "Enabling Azure Policy addon for Pod Security..."
-                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName AzurePolicy
+                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                   Write-Host "Enabling Application Gateway Ingress Controller addon for AKS..."
                   $appGatewayName = "${{ parameters.cluster_name }}-appgw"
                   $appGatewayId = (Get-AzApplicationGateway | Where-Object { $_.Name -eq $appGatewayName }).Id
-                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -AddonName ingress-appgw -AppGatewayId $appGatewayId
+                  Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name ingress-appgw -AppGatewayId $appGatewayId
                 azurePowerShellVersion: 'LatestVersion'
             # Customize ghost-deployment.yaml file
             - task: PowerShell@2
