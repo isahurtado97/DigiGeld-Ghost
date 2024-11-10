@@ -17,5 +17,5 @@ process {
     Create-AzContainerRegistry -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName
     
     # Deploy Create-LogAnalyticsWorkspace if not exists
-    Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName
+    Create-LogAnalyticsWorkspace -ResourceGroupName $ResourceGroupName -Location $location -acrName $acrName -aksClusterName $aksClusterName -sku 'Standard'
 }
