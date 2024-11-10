@@ -48,4 +48,15 @@ az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --o
 helm repo add spv-charts https://charts.spvapi.no
 helm repo update
 helm install akv2k8s spv-charts/akv2k8s --namespace akv2k8s --create-namespace
-kubectl get pods -n akv2k8s
+# Get the AKS managed identity object ID
+aksIdentity=$(az aks show --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --query identityProfile.kubeletidentity.objectId -o tsv)
+Write-Host "AKS Managed Identity Object ID: $aksIdentity"
+
+# Get the Key Vault resource ID
+keyVaultResourceId=$(az keyvault show --name "$CLUSTER_NAME-vault" --resource-group $RESOURCE_GROUP --query id -o tsv)
+Write-Host "Key Vault Resource ID: $keyVaultResourceId"
+
+# Assign the required roles to the AKS identity
+# Assign Key Vault Secrets User Role
+az role assignment create --assignee $aksIdentity --role "Key Vault Secrets User" --scope $keyVaultResourceId
+Write-Host "Key Vault Secrets User Role assigned to AKS Managed Identity."
