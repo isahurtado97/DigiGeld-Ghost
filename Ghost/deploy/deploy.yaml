@@ -50,10 +50,10 @@ stages:
         - name: DigiGeld
           code: prod
           azureSubscription: DigiGeld SC PROD
-          resource_group: dg-rg-prod1
+          resource_group: dg-rg-prod
           location: northeurope
-          acr_name: dgacrprod1
-          cluster_name: dg-aks-prod1
+          acr_name: dgacrprod
+          cluster_name: dg-aks-prod
           dependsOn:
             - pre_steps
             - DigiGeld_acc # DigiGeld_prod depends on DigiGeld_acc
