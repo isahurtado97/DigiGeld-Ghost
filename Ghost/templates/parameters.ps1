@@ -1,10 +1,10 @@
 $parameters = @{
-    deployAll = $false
+    deployAll = $true
     deployAks = $true
     deployAcr = $true
-    deployLogAnalytics = $false
+    deployLogAnalytics = $true
     deployKeyVault = $true
-    deployAppGateway = $false
+    deployAppGateway = $true
     acrName=""
     aksClusterName=""
     location=""
