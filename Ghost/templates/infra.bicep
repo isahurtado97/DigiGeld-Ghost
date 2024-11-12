@@ -46,7 +46,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-04-01' = if
 }
 
 // Key Vault
-resource keyVault 'Microsoft.KeyVault/vaults@2023-01-01' = if (deployKeyVault || deployAll) {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = if (deployKeyVault || deployAll) {
   name: keyVaultName
   location: location
   properties: {
