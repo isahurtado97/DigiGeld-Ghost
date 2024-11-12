@@ -40,7 +40,7 @@ jobs:
                     $null= New-AzResourceGroup -ResourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -Force
                   }
                   . '/$(Pipeline.Workspace)/artifacts/Ghost/templates/parameters.ps1'
-                  New-AzResourceGroupDeployment -ResourceGroupName ${{ parameters.resource_group }}  -TemplateFile '/$(Pipeline.Workspace)/artifacts/Ghost/templates/infra.bicep' -TemplateParameterObject $parameters -Verbose -whatif
+                  New-AzResourceGroupDeployment -ResourceGroupName ${{ parameters.resource_group }}  -TemplateFile '$(Pipeline.Workspace)/artifacts/Ghost/templates/infra.bicep' -TemplateParameterObject $parameters -Verbose -whatif
 
                   #Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                 azurePowerShellVersion: 'LatestVersion'
