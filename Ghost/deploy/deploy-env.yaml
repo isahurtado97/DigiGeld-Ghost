@@ -39,12 +39,19 @@ jobs:
                     Write-host "Creating Resource Group"
                     $null= New-AzResourceGroup -ResourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -Force
                   }
-                  $parameters.acrName="${{ parameters.acr_name }}"
-                  $parameters.aksClusterName="${{ parameters.cluster_name }}"
-                  $parameters.location="${{ parameters.location }}"
-                  $parameters.logAnalyticsWorkspaceName="${{ parameters.cluster_name }}-Workspace"
-                  $parameters.KeyvaultName="${{ parameters.resource_group  }}-vault"
-                  . '/$(Pipeline.Workspace)/artifacts/Ghost/templates/parameters.ps1'
+                  $parameters = @{
+                    deployAll = $false
+                    deployAks = $true
+                    deployAcr = $true
+                    deployLogAnalytics = $false
+                    deployKeyVault = $true
+                    deployAppGateway = $false
+                    acrName="${{ parameters.acr_name }}"
+                    aksClusterName="${{ parameters.cluster_name }}"
+                    location="${{ parameters.location }}"
+                    logAnalyticsWorkspaceName="${{ parameters.cluster_name }}-Workspace"
+                    KeyvaultName="${{ parameters.resource_group  }}-vault"
+                  }
                   New-AzResourceGroupDeployment -ResourceGroupName ${{ parameters.resource_group }}  -TemplateFile '$(Pipeline.Workspace)/artifacts/Ghost/templates/infra.bicep' -TemplateParameterObject $parameters -Verbose
                   #Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                 azurePowerShellVersion: 'LatestVersion'
