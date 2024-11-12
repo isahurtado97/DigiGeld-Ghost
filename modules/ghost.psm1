@@ -112,7 +112,7 @@ function NewDeployinfra{
      [string]$basepath
     )
     begin{
-        Ensure-AzModule
+        EnsureAzModule
     }
     process{
         DeployAzResourceGroup -resourceGroupName $resourceGroupName -location $Location
