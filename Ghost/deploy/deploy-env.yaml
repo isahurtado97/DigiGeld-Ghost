@@ -39,6 +39,11 @@ jobs:
                     Write-host "Creating Resource Group"
                     $null= New-AzResourceGroup -ResourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -Force
                   }
+                  $parameters.acrName=${{ parameters.acr_name }} 
+                  $parameters.aksClusterName=${{ parameters.cluster_name }} 
+                  $parameters.location= ${{ parameters.location }} 
+                  $parameters.logAnalyticsWorkspaceName="${{ parameters.cluster_name }}-Workspace"
+                  $parameters.KeyvaultName="${{ parameters.resource_group  }}-vault"
                   . '/$(Pipeline.Workspace)/artifacts/Ghost/templates/parameters.ps1'
                   New-AzResourceGroupDeployment -ResourceGroupName ${{ parameters.resource_group }}  -TemplateFile '$(Pipeline.Workspace)/artifacts/Ghost/templates/infra.bicep' -TemplateParameterObject $parameters -Verbose
 
