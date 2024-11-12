@@ -5,9 +5,9 @@ $parameters = @{
     deployLogAnalytics = $true
     deployKeyVault = $true
     deployAppGateway = $true
-    acrName=""
-    aksClusterName=""
-    location=""
-    logAnalyticsWorkspaceName=""
-    KeyvaultName=""
+    acrName="dgacrprod"
+    aksClusterName="dg-aks-prod"
+    location="northeurope"
+    logAnalyticsWorkspaceName="dg-rg-prod-Workspace"
+    KeyvaultName="dg-rg-prod-vault"
 }

@@ -11,6 +11,23 @@ param acrName string = 'myacrname' // Must be globally unique
 param logAnalyticsWorkspaceName string = 'my-log-analytics'
 param keyVaultName string = 'my-keyvault' // Must be globally unique
 param appGatewayName string = '${aksClusterName}-appgw'
+@description('Permissions for keys')
+param keyPermissions array = [
+  'get'
+  'list'
+]
+
+@description('Permissions for secrets')
+param secretPermissions array = [
+  'get'
+  'list'
+]
+
+@description('Permissions for certificates')
+param certificatePermissions array = [
+  'get'
+  'list'
+]
 
 // Networking Parameters
 param appGatewayVnetName string = '${aksClusterName}-appgw-vnet'
@@ -34,7 +51,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = if (d
 }
 
 // Log Analytics Workspace
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-04-01' = if (deployLogAnalytics || deployAll) {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (deployLogAnalytics || deployAll) {
   name: logAnalyticsWorkspaceName
   location: location
   properties: {
@@ -46,7 +63,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-04-01' = if
 }
 
 // Key Vault
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = if (deployKeyVault || deployAll) {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   name: keyVaultName
   location: location
   properties: {
@@ -55,6 +72,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = if (deployKeyVault ||
       name: 'standard'
     }
     tenantId: subscription().tenantId
+    accessPolicies: [
+    ]
   }
 }
 
@@ -148,42 +167,6 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2023-02-01' = if (deployA
   }
 }
 
-// Application Gateway
-resource appGateway 'Microsoft.Network/applicationGateways@2023-02-01' = if (deployAppGateway || deployAll) {
-  name: appGatewayName
-  location: location
-  properties: {
-    sku: {
-      name: 'Standard_v2'
-      tier: 'Standard_v2'
-      capacity: 2
-    }
-    gatewayIPConfigurations: [
-      {
-        name: 'gatewayIpConfig'
-        properties: {
-          subnet: {
-            id: appGatewayVnet.properties.subnets[0].id
-          }
-        }
-      }
-    ]
-    frontendIPConfigurations: [
-      {
-        name: 'frontendIpConfig'
-        properties: {
-          publicIPAddress: {
-            id: publicIp.id
-          }
-        }
-      }
-    ]
-  }
-  dependsOn: [
-    appGatewayVnet
-    publicIp
-  ]
-}
 
 // AKS Cluster
 resource aks 'Microsoft.ContainerService/managedClusters@2023-03-01' = if (deployAks || deployAll) {
@@ -230,4 +213,3 @@ output acrId string = acr.id
 output logAnalyticsId string = logAnalytics.id
 output keyVaultId string = keyVault.id
 output aksId string = aks.id
-output appGatewayId string = appGateway.id
