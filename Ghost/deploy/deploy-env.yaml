@@ -35,7 +35,7 @@ jobs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
                 Inline: |
-                    Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
+                    Import-Module '$(Pipeline.Workspace)/artifacts/modules/ghost.psm1'
                     NewDeployInfra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acr_name }} -basepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/bicep"
                 azurePowerShellVersion: 'LatestVersion'
             # Deploying App: ghost-deployment.yaml file customize.
