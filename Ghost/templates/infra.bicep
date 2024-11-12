@@ -52,7 +52,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if
 }
 
 // Key Vault
-resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = if (deployKeyVault || deployAll) {
   name: keyVaultName
   location: location
   properties: {
@@ -89,14 +89,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-01' = if (deplo
       networkPlugin: 'azure'
       serviceCidr: '10.0.2.0/24'
       dnsServiceIP: '10.0.2.10'
-    }
-    addonProfiles: {
-      omsagent: {
-        enabled: true
-        config: {
-          logAnalyticsWorkspaceResourceID: logAnalytics.id
-        }
-      }
     }
   }
   dependsOn: [
