@@ -53,11 +53,8 @@ function Create-LogAnalyticsWorkspace {
     param(
         [string]$resourceGroupName,
         [string]$location,
-        [string]$acrName,
         [string]$aksClusterName
     )
-    # Get the ACR resource ID (used for AKS integration)
-    $acrResourceId = (Get-AzContainerRegistry -ResourceGroupName $resourceGroupName -RegistryName $acrName).Id
     # Check if Log Analytics Workspace exists
     $workspace = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroupName -Name "$aksClusterName-Workspace" -ErrorAction SilentlyContinue
     if ($workspace) {
@@ -87,6 +84,7 @@ function Deploy-SecurityConfig {
     if ($appGateway) {
         Write-Host "Resource $resourceGroupName-vault already exists."
     } else {
+        Write-Host "Creating Application Gateway..."
         $Subnet = New-AzVirtualNetworkSubnetConfig -Name "$aksClusterName-sn" -AddressPrefix 10.0.0.0/24
         $VNet = New-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName -Location "northeurope" -AddressPrefix 10.0.0.0/16 -Subnet $Subnet -Force
         $VNet = Get-AzVirtualNetwork -Name "$aksClusterName-vn" -ResourceGroupName $resourceGroupName 
@@ -102,5 +100,34 @@ function Deploy-SecurityConfig {
         $Rule = New-AzApplicationGatewayRequestRoutingRule -Name "$aksClusterName-routing-rule01" -RuleType basic -BackendHttpSettings $PoolSetting -HttpListener $Listener -BackendAddressPool $Pool -Priority 200
         $Sku = New-AzApplicationGatewaySku -Name "Standard_v2" -Tier Standard_v2 -Capacity 2
         $Gateway = New-AzApplicationGateway -Name "$aksClusterName-appgw"  -ResourceGroupName $resourceGroupName -Location "northeurope" -BackendAddressPools $Pool -BackendHttpSettingsCollection $PoolSetting -FrontendIpConfigurations $FrontEndIpConfig  -GatewayIpConfigurations $GatewayIpConfig -FrontendPorts $FrontEndPort -HttpListeners $Listener -RequestRoutingRules $Rule -Sku $Sku
+        Write-Host "Creating Application Gateway Deployed..."
+    }
+
+}
+function Deploy-infra{
+    param(
+     [string]$resourceGroupName,
+     [string]$Location,
+     [string]$aksClusterName,
+     [string]$acrName,
+    )
+    begin{
+        Ensure-AzModule
+    }
+    process{
+        Deploy-SecurityConfig -resourceGroupName $resourceGroupName -Location $Location -aksClusterName $aksClusterName
+        Create-LogAnalyticsWorkspace -ResourceGroupName $resourceGroupName -Location $Location -acrName $acrName -aksClusterName $aksClusterName -sku 'Standard'
+        $AppGatewayID=Get-AzResource -ResourceName "$aksClusterName-appgw" -ResourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
+        $PublicIpID=Get-AzResource -ResourceName "$aksClusterName-pip" -ResourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
+        $LogAWID=Get-AzResource -ResourceName "$aksClusterName-Workspace" -ResourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
+        $parameters = @{
+        vaults_dg_aks_prod_vault_name  = "$aksClusterName-vault"
+        registries_dgacrprod_name = $acrName
+        managedClusters_dg_aks_prod_name  = $aksClusterName
+        applicationGateways_dg_aks_prod_appgw_externalid  = $AppGatewayID
+        workspaces_dg_aks_prod_Workspace_externalid  = $LogAWID
+        publicIPAddresses_bd1aec30_36bc_48ef_8301_435ccbf0d11f_externalid  = $PublicIpID
+        }
+        New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "infra.bicep" -TemplateParameterObject $parameters -Verbose
     }
 }
