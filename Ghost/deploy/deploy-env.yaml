@@ -45,7 +45,6 @@ jobs:
                     deployAcr = $true
                     deployLogAnalytics = $false
                     deployKeyVault = $true
-                    deployAppGateway = $false
                     acrName="${{ parameters.acr_name }}"
                     aksClusterName="${{ parameters.cluster_name }}"
                     location="${{ parameters.location }}"
