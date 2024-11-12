@@ -40,7 +40,7 @@ jobs:
                       $null= New-AzResourceGroup -ResourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -Force
                     }
                     Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                    Deploy-Infra -resourceGroupName ${{ parameters.cluster_name }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acrName }}
+                    Deploy-Infra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acrName }}
                     Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                 azurePowerShellVersion: 'LatestVersion'
             # Deploying App: ghost-deployment.yaml file customize.
