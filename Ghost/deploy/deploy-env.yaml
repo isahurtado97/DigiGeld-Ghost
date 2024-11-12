@@ -30,7 +30,7 @@ jobs:
             # Deploying Infrastructure: Pre-requisites.
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure Components."
+              displayName: "Deploying Infrastructure : Pre-requisites."
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
