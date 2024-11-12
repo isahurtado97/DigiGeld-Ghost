@@ -207,8 +207,16 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-01' = if (deplo
     enableRBAC: true
     networkProfile: {
       networkPlugin: 'azure'
-      serviceCidr: '10.0.0.0/16'
-      dnsServiceIP: '10.0.0.10'
+      serviceCidr: '10.0.2.0/24'
+      dnsServiceIP: '10.0.2.10'
+    }
+    addonProfiles: {
+      omsagent: {
+        enabled: true
+        config: {
+          logAnalyticsWorkspaceResourceID: logAnalytics.id
+        }
+      }
     }
   }
   dependsOn: [
