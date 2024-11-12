@@ -4,6 +4,7 @@ param managedClusters_dg_aks_prod_name string = 'dg-aks-prod'
 param applicationGateways_dg_aks_prod_appgw_externalid string = ''
 param workspaces_dg_aks_prod_Workspace_externalid string = ''
 param publicIPAddresses_bd1aec30_36bc_48ef_8301_435ccbf0d11f_externalid string = ''
+param resourceGroupName string = ''
 
 resource registries_dgacrprod_name_resource 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' = {
   name: registries_dgacrprod_name
@@ -121,7 +122,7 @@ resource managedClusters_dg_aks_prod_name_resource 'Microsoft.ContainerService/m
         }
       }
     }
-    nodeResourceGroup: '${managedClusters_dg_aks_prod_name}-node-rg'
+    nodeResourceGroup: '${resourceGroupName}'
     enableRBAC: true
     networkProfile: {
       networkPlugin: 'kubenet'

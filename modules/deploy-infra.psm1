@@ -122,6 +122,7 @@ function Deploy-infra{
         $PublicIpID=Get-AzResource -ResourceName "$aksClusterName-pip" -ResourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $LogAWID=Get-AzResource -ResourceName "$aksClusterName-Workspace" -ResourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $parameters = @{
+        resourceGroupName = $resourceGroupName
         vaults_dg_aks_prod_vault_name  = "$aksClusterName-vault"
         registries_dgacrprod_name = $acrName
         managedClusters_dg_aks_prod_name  = $aksClusterName
