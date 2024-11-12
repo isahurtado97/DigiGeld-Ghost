@@ -4,7 +4,6 @@ $parameters = @{
     deployAcr = $true
     deployLogAnalytics = $true
     deployKeyVault = $true
-    deployAppGateway = $true
     acrName="dgacrprod"
     aksClusterName="dg-aks-prod"
     location="northeurope"
