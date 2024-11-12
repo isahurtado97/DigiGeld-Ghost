@@ -115,9 +115,9 @@ function NewDeployinfra{
         EnsureAzModule
     }
     process{
-        DeployAzResourceGroup -resourceGroupName $resourceGroupName -location $Location
-        DeploySecurityConfig -resourceGroupName $resourceGroupName -Location $Location -clusterName $clusterName
-        CreateLogAnalyticsWorkspace -resourceGroupName $resourceGroupName -Location $Location -acrName $acrName -clusterName $clusterName -sku 'Standard'
+        NewDeployAzResourceGroup -resourceGroupName $resourceGroupName -location $Location
+        NewDeploySecurityConfig -resourceGroupName $resourceGroupName -Location $Location -clusterName $clusterName
+        NewDeployLogAnalyticsWorkspace -resourceGroupName $resourceGroupName -Location $Location -acrName $acrName -clusterName $clusterName -sku 'Standard'
         $AppGatewayID=Get-AzResource -ResourceName "$clusterName-appgw" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $PublicIpID=Get-AzResource -ResourceName "$clusterName-pip" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $LogAWID=Get-AzResource -ResourceName "$clusterName-Workspace" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
@@ -133,7 +133,7 @@ function NewDeployinfra{
         New-AzResourceGroupDeployment -resourceGroupName $resourceGroupName -TemplateFile "$basepath/infra.bicep" -TemplateParameterObject $parameters -Verbose
         Enable-AzAksAddon -resourceGroupName $resourceGroupName -clusterName $clusterName -Name AzurePolicy
         identityAzKeyvaultAks -resourceGroupName $resourceGroupName -clusterName $clusterName -keyVaultName "$clusterName-vault"
-        DeployvnetPeer -ResourceGroupName $resourceGroupName
+        NewDeployvnetPeer -ResourceGroupName $resourceGroupName
     }
 }
 function identityAzKeyvaultAks{ 
@@ -179,4 +179,3 @@ function Setup-Ghost-Files{
         $file | Out-File -FilePath $filefinalpath
     }
 }
-
