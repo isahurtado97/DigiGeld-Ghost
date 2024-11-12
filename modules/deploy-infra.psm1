@@ -109,7 +109,7 @@ function Deploy-infra{
      [string]$resourceGroupName,
      [string]$Location,
      [string]$aksClusterName,
-     [string]$acrName,
+     [string]$acrName
     )
     begin{
         Ensure-AzModule
