@@ -45,8 +45,8 @@ jobs:
               inputs:
                 ScriptType: 'InlineScript'
                 Inline: |
-                  Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                  Setup-Ghost-Files -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/ghost-deployment.yaml" -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/${{ parameters.cluster_name }}.yaml" -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
+                  Import-Module '$(Pipeline.Workspace)/artifacts/modules/ghost.psm1'
+                  SetupGhostFiles -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/ghost-deployment.yaml" -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/${{ parameters.cluster_name }}.yaml" -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
                 pwsh: true
             # Deploying App: Push Ghost Image to AKS.
             - task: Bash@3

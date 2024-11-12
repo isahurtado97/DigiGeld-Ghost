@@ -70,7 +70,7 @@ function NewDeploySecurityConfig {
         Write-Host "Creating Application Gateway..."
         $Subnet = New-AzVirtualNetworkSubnetConfig -Name "$clusterName-sn" -AddressPrefix 10.0.0.0/24
         $VNet = New-AzVirtualNetwork -Name "$clusterName-appgw-vn" -resourceGroupName $resourceGroupName -Location "northeurope" -AddressPrefix 10.0.0.0/16 -Subnet $Subnet -Force
-        $VNet = Get-AzVirtualNetwork -Name "$clusterName-vn" -resourceGroupName $resourceGroupName 
+        $VNet = Get-AzVirtualNetwork -Name "$clusterName-appgw-vn" -resourceGroupName $resourceGroupName 
         $Subnet = Get-AzVirtualNetworkSubnetConfig -Name "$clusterName-sn"  -VirtualNetwork $VNet 
         $GatewayIPconfig = New-AzApplicationGatewayIPConfiguration -Name "$clusterName-gw-ip" -Subnet $Subnet
         $Pool = New-AzApplicationGatewayBackendAddressPool -Name "$clusterName-pool" -BackendIPAddresses 10.10.10.1, 10.10.10.2, 10.10.10.3
@@ -167,7 +167,7 @@ function identityAzKeyvaultAks{
 
 
 }
-function Setup-Ghost-Files{
+function SetupGhostFiles{
     param(
         [string]$filepath,
         [string]$filefinalpath,
