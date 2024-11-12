@@ -16,7 +16,7 @@ function EnsureAzModule {
         Write-Host "Az module successfully installed and imported."
     }
 }
-function DeployAzResourceGroup {
+function NewDeployAzResourceGroup {
     param(
         [string]$resourceGroupName,
         [string]$location
@@ -32,7 +32,7 @@ function DeployAzResourceGroup {
         }
     }
 }
-function DeployLogAnalyticsWorkspace {
+function NewDeployLogAnalyticsWorkspace {
     param(
         [string]$resourceGroupName,
         [string]$location,
@@ -54,7 +54,7 @@ function DeployLogAnalyticsWorkspace {
         Write-Host "Log Analytics Workspace created successfully."
     }
 }
-function DeploySecurityConfig {
+function NewDeploySecurityConfig {
     param(
         [string]$resourceGroupName,
         [string]$location,
@@ -87,7 +87,7 @@ function DeploySecurityConfig {
     }
 
 }
-function DeployvnetPeer{
+function NewDeployvnetPeer{
     # Variables
     param(
         $ResourceGroupName
@@ -103,7 +103,7 @@ function DeployvnetPeer{
     -RemoteVirtualNetworkId $appGwnet.Id `
     -AllowVirtualNetworkAccess $true
 }
-function Deployinfra{
+function NewDeployinfra{
     param(
      [string]$resourceGroupName,
      [string]$Location,
