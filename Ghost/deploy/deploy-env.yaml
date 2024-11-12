@@ -57,4 +57,5 @@ jobs:
                 arguments: >
                   ${{ parameters.resource_group }}
                   ${{ parameters.cluster_name }}
-                  "$(Pipeline.Workspace)/artifacts/Ghost/templates/${{ parameters.cluster_name }}.yaml"
+                  "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/${{ parameters.cluster_name }}.yaml"
+                  "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/monitoring-deploy.yaml"
