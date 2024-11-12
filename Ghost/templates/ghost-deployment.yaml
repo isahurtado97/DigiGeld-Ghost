@@ -1,10 +1,19 @@
+# Namespace for Ghost and MySQL resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ghost
+
+---
+
+# Ghost Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ghost
   namespace: ghost
 spec:
-  replicas: 1  # Updated for scalability
+  replicas: 2
   selector:
     matchLabels:
       app: ghost
@@ -14,32 +23,44 @@ spec:
         app: ghost
     spec:
       containers:
-        - name: ghost
-          image: "CHANGE_IMAGE"
-          ports:
-            - containerPort: 2368
-          env:
-            - name: database__client
-              value: mysql
-            - name: database__connection__host
-              value: mysql-service.ghost.svc.cluster.local
-            - name: database__connection__user
-              value: "root"
-            - name: database__connection__password
-              value: "CHANGE_PASSWORD"
-            - name: database__connection__database
-              value: ghost
-            - name: url
-              value: http://localhost:8080
-          volumeMounts:
-            - name: ghost-content
-              mountPath: /var/lib/ghost/content
-      volumes:
+      - name: ghost
+        image: "image"
+        ports:
+        - containerPort: 2368
+        env:
+        - name: database__client
+          value: mysql
+        - name: database__connection__host
+          value: mysql-service.ghost.svc.cluster.local
+        - name: database__connection__user
+          valueFrom:
+            secretKeyRef:
+              name: ghost-secrets
+              key: user
+        - name: database__connection__password
+          valueFrom:
+            secretKeyRef:
+              name: ghost-secrets
+              key: password
+        - name: database__connection__database
+          value: dgghostdb
+        volumeMounts:
         - name: ghost-content
-          persistentVolumeClaim:
-            claimName: ghost-pvc
-
+          mountPath: /var/lib/ghost/content
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      volumes:
+      - name: ghost-content
+        persistentVolumeClaim:
+          claimName: ghost-pvc
 ---
+
+# Service for Ghost
 apiVersion: v1
 kind: Service
 metadata:
@@ -49,19 +70,21 @@ spec:
   selector:
     app: ghost
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 2368
-  type: LoadBalancer
+  - protocol: TCP
+    port: 80
+    targetPort: 2368
+  type: ClusterIP
 
 ---
+
+# StatefulSet for MySQL
 apiVersion: apps/v1
-kind: StatefulSet  # Changed from Deployment to StatefulSet for MySQL
+kind: StatefulSet
 metadata:
   name: mysql
   namespace: ghost
 spec:
-  replicas: 1  # Updated for high availability
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
@@ -72,35 +95,62 @@ spec:
         app: mysql
     spec:
       containers:
-        - name: mysql
-          image: mysql:8.0
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: "CHANGE_PASSWORD"
-          volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
-      volumes:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ghost-secrets
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: dgghostdb
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: ghost-secrets
+              key: user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ghost-secrets
+              key: password
+        volumeMounts:
         - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-pvc
+          mountPath: /var/lib/mysql
+        resources:
+          requests:
+            cpu: 300m
+            memory: 512Mi
+          limits:
+            cpu: 700m
+            memory: 1Gi
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+
 
 ---
+
+# Service for MySQL
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql-service
   namespace: ghost
 spec:
-  clusterIP: None  # Required for StatefulSet
+  clusterIP: None
   selector:
     app: mysql
   ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
 
 ---
+
+# PersistentVolumeClaim for Ghost
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -108,12 +158,14 @@ metadata:
   namespace: ghost
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi  # Increased storage for production use
+      storage: 10Gi
 
 ---
+
+# PersistentVolumeClaim for MySQL
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -121,38 +173,156 @@ metadata:
   namespace: ghost
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi  # Increased storage for production database
+      storage: 20Gi
 
 ---
-apiVersion: batch/v1
-kind: CronJob
+
+# AzureKeyVaultSecret for root-password
+apiVersion: spv.no/v2beta1
+kind: AzureKeyVaultSecret
 metadata:
-  name: mysql-backup
+  name: root-password-sync
   namespace: ghost
 spec:
-  schedule: "0 2 * * *"  # Daily at 2:00 AM
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: mysql-backup
-            image: mysql:8.0
-            command: ["/bin/bash", "-c"]
-            args:
-            - |
-              mysqldump -h mysql-service.ghost -u root -p${MYSQL_ROOT_PASSWORD} ghost > /backup/ghost_backup.sql &&
-              az storage blob upload --account-name <STORAGE_ACCOUNT> --container-name backups --file /backup/ghost_backup.sql --name ghost_backup_$(date +%F).sql
-            env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: root-password
-          restartPolicy: OnFailure
-          volumes:
-          - name: backup-volume
-            emptyDir: {}
+  vault:
+    name: "dg-aks-acc-vault"  # Replace with your Azure Key Vault name
+    object:
+      name: "root-password"     # Secret name in Azure Key Vault
+      type: secret
+  output:
+    secret:
+      name: ghost-secrets       # Kubernetes Secret to create/update
+      dataKey: root-password    # Key inside the Kubernetes Secret
+
+---
+
+# AzureKeyVaultSecret for password
+apiVersion: spv.no/v2beta1
+kind: AzureKeyVaultSecret
+metadata:
+  name: password-sync
+  namespace: ghost
+spec:
+  vault:
+    name: "dg-aks-acc-vault"
+    object:
+      name: "password"          # Secret name in Azure Key Vault
+      type: secret
+  output:
+    secret:
+      name: ghost-secrets       # Kubernetes Secret to create/update
+      dataKey: password
+
+---
+
+# AzureKeyVaultSecret for password
+apiVersion: spv.no/v2beta1
+kind: AzureKeyVaultSecret
+metadata:
+  name: user-sync
+  namespace: ghost
+spec:
+  vault:
+    name: "dg-aks-acc-vault"
+    object:
+      name: "user"          # Secret name in Azure Key Vault
+      type: secret
+  output:
+    secret:
+      name: ghost-secrets       # Kubernetes Secret to create/update
+      dataKey: user
+
+---
+# AzureKeyVault tlc certf
+apiVersion: spv.no/v2beta1
+kind: AzureKeyVaultSecret
+metadata:
+  name: ghost-tls-secret-sync
+  namespace: ghost
+spec:
+  vault:
+    name: "dg-aks-acc-vault"
+    object:
+      name: dgghostapp
+      type: certificate
+  output:
+    secret:
+      name: ghost-tls-secret
+      type: kubernetes.io/tls
+---
+# Horizontal Pod Autoscaler for Ghost
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ghost-hpa
+  namespace: ghost
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ghost
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mysql-hpa
+  namespace: ghost
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: mysql
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+
+# Ingress for Ghost using Azure Application Gateway
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ghost-ingress
+  namespace: ghost
+  annotations:
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/request-timeout: "30"
+    appgw.ingress.kubernetes.io/connection-draining: "true"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+spec:
+  ingressClassName: azure-application-gateway
+  tls:
+  - hosts:
+    - dgghostapp.ichp-tech.info
+    secretName: ghost-tls-secret  # Ensure this secret exists
+  rules:
+  - host: dgghostapp.ichp-tech.info
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ghost-service
+            port:
+              number: 2368

@@ -30,56 +30,69 @@ jobs:
             # Deploying Infrastructure: Pre-requisites.
             - task: AzurePowerShell@5
               condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Pre-requisites."
-              inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
-                ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
-                ScriptArguments: >
-                  -resourceGroupName ${{ parameters.resource_group }}
-                  -location ${{ parameters.location }}
-                  -acrName ${{ parameters.acr_name }}
-                  -aksClusterName ${{ parameters.cluster_name }}
-                  -basepath '$(Pipeline.Workspace)/artifacts/modules'
-                azurePowerShellVersion: LatestVersion
-                pwsh: true
-            # Deploying Infrastructure: Aks Cluster.
-            - task: Bash@3
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Aks Cluster."
-              inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
-                arguments: >
-                  ${{ parameters.resource_group }}
-                  ${{ parameters.acr_name }}
-                  ${{ parameters.cluster_name }}
-            # Deploying Infrastructure: Azure Key Vault.
-            - task: Bash@3
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: "Deploying Infrastructure: Azure Key Vault."
-              inputs:
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
-                arguments: >
-                  ${{ parameters.cluster_name }}
-                  ${{ parameters.resource_group }}
-                  ${{ parameters.location }}
-                  "root-password"
-                  "GhosDBUser"
-                  "xxxxsss"
-                  "${{ parameters.azureSubscription }}"
-            # Deploying Infrastructure: Security and Extras.
-            - task: AzurePowerShell@5
-              condition: eq(variables['deployInfra'], 'true')
-              displayName: 'Deploying Infrastructure: Security and Extras.'
+              displayName: "Deploying Infrastructure Components."
               inputs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
                 Inline: |
-                  Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                  Deploy-SecurityConfig -resourceGroupName ${{ parameters.cluster_name }} -Location $location -aksClusterName ${{ parameters.cluster_name }}
-                  # Enable addons
-                  Write-Host "Enabling Azure Policy addon for Pod Security..."
+                  . '/$(Pipeline.Workspace)/artifacts/Ghost/templates/parameters.ps1'
+                  New-AzResourceGroupDeployment -ResourceGroupName ${{ parameters.resource_group }}  -TemplateFile '/$(Pipeline.Workspace)/artifacts/Ghost/templates/infra.bicep' -TemplateParameterObject $parameters -Verbose -whatif
+
                   Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
                 azurePowerShellVersion: 'LatestVersion'
+            ## Deploying Infrastructure: Pre-requisites.
+            #- task: AzurePowerShell@5
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: Pre-requisites."
+            #  inputs:
+            #    azureSubscription: ${{ parameters.azureSubscription }}
+            #    ScriptPath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/deploy-infra.ps1'
+            #    ScriptArguments: >
+            #      -resourceGroupName ${{ parameters.resource_group }}
+            #      -location ${{ parameters.location }}
+            #      -acrName ${{ parameters.acr_name }}
+            #      -aksClusterName ${{ parameters.cluster_name }}
+            #      -basepath '$(Pipeline.Workspace)/artifacts/modules'
+            #    azurePowerShellVersion: LatestVersion
+            #    pwsh: true
+            ## Deploying Infrastructure: Aks Cluster.
+            #- task: Bash@3
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: Aks Cluster."
+            #  inputs:
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/deploy-aks.sh'
+            #    arguments: >
+            #      ${{ parameters.resource_group }}
+            #      ${{ parameters.acr_name }}
+            #      ${{ parameters.cluster_name }}
+            ## Deploying Infrastructure: Azure Key Vault.
+            #- task: Bash@3
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: "Deploying Infrastructure: Azure Key Vault."
+            #  inputs:
+            #    filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/bash/keyvault.sh'
+            #    arguments: >
+            #      ${{ parameters.cluster_name }}
+            #      ${{ parameters.resource_group }}
+            #      ${{ parameters.location }}
+            #      "root-password"
+            #      "GhosDBUser"
+            #      "xxxxsss"
+            #      "${{ parameters.azureSubscription }}"
+            ## Deploying Infrastructure: Security and Extras.
+            #- task: AzurePowerShell@5
+            #  condition: eq(variables['deployInfra'], 'true')
+            #  displayName: 'Deploying Infrastructure: Security and Extras.'
+            #  inputs:
+            #    azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
+            #    ScriptType: 'InlineScript'
+            #    Inline: |
+            #      Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
+            #      Deploy-SecurityConfig -resourceGroupName ${{ parameters.cluster_name }} -Location $location -aksClusterName ${{ parameters.cluster_name }}
+            #      # Enable addons
+            #      Write-Host "Enabling Azure Policy addon for Pod Security..."
+            #      Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
+            #    azurePowerShellVersion: 'LatestVersion'
             # Deploying App: ghost-deployment.yaml file customize.
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')

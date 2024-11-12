@@ -21,5 +21,5 @@ process {
 
     #Wait for all to be deploy and recognized
     Start-Sleep -Seconds 120
-    Write-host "All is deploy and recognized"
+    Write-host "All is deployed and recognized"
 }

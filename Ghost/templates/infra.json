@@ -1,0 +1,313 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.31.34.60546",
+      "templateHash": "11680559224593987328"
+    }
+  },
+  "parameters": {
+    "deployAll": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "deployAks": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "deployAcr": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "deployLogAnalytics": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "deployKeyVault": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "deployAppGateway": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "aksClusterName": {
+      "type": "string",
+      "defaultValue": "my-aks-cluster"
+    },
+    "acrName": {
+      "type": "string",
+      "defaultValue": "myacrname"
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "my-log-analytics"
+    },
+    "keyVaultName": {
+      "type": "string",
+      "defaultValue": "my-keyvault"
+    },
+    "appGatewayName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-appgw', parameters('aksClusterName'))]"
+    },
+    "appGatewayVnetName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-appgw-vnet', parameters('aksClusterName'))]"
+    },
+    "aksVnetName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-aks-vnet', parameters('aksClusterName'))]"
+    },
+    "appGatewaySubnetName": {
+      "type": "string",
+      "defaultValue": "appgw-subnet"
+    },
+    "aksSubnetName": {
+      "type": "string",
+      "defaultValue": "aks-subnet"
+    },
+    "appGatewayVnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.1.0.0/16"
+    },
+    "aksVnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "publicIpName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-pip', parameters('aksClusterName'))]"
+    }
+  },
+  "resources": [
+    {
+      "condition": "[or(parameters('deployAcr'), parameters('deployAll'))]",
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[parameters('acrName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": false
+      }
+    },
+    {
+      "condition": "[or(parameters('deployLogAnalytics'), parameters('deployAll'))]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-04-01",
+      "name": "[parameters('logAnalyticsWorkspaceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "condition": "[or(parameters('deployKeyVault'), parameters('deployAll'))]",
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]"
+      }
+    },
+    {
+      "condition": "[or(parameters('deployAppGateway'), parameters('deployAll'))]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-02-01",
+      "name": "[parameters('appGatewayVnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('appGatewayVnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('appGatewaySubnetName')]",
+            "properties": {
+              "addressPrefix": "10.1.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "condition": "[or(parameters('deployAks'), parameters('deployAll'))]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-02-01",
+      "name": "[parameters('aksVnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('aksVnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('aksSubnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2023-02-01",
+      "name": "[format('{0}/to-{1}', parameters('aksVnetName'), parameters('appGatewayVnetName'))]",
+      "properties": {
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false,
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('appGatewayVnetName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('aksVnetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('appGatewayVnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+      "apiVersion": "2023-02-01",
+      "name": "[format('{0}/to-{1}', parameters('appGatewayVnetName'), parameters('aksVnetName'))]",
+      "properties": {
+        "allowVirtualNetworkAccess": true,
+        "allowForwardedTraffic": true,
+        "allowGatewayTransit": false,
+        "useRemoteGateways": false,
+        "remoteVirtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('aksVnetName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('aksVnetName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('appGatewayVnetName'))]"
+      ]
+    },
+    {
+      "condition": "[or(parameters('deployAppGateway'), parameters('deployAll'))]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2023-02-01",
+      "name": "[parameters('publicIpName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "condition": "[or(parameters('deployAppGateway'), parameters('deployAll'))]",
+      "type": "Microsoft.Network/applicationGateways",
+      "apiVersion": "2023-02-01",
+      "name": "[parameters('appGatewayName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "Standard_v2",
+          "tier": "Standard_v2",
+          "capacity": 2
+        },
+        "gatewayIPConfigurations": [
+          {
+            "name": "gatewayIpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('appGatewayVnetName')), '2023-02-01').subnets[0].id]"
+              }
+            }
+          }
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "frontendIpConfig",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('appGatewayVnetName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
+      ]
+    },
+    {
+      "condition": "[or(parameters('deployAks'), parameters('deployAll'))]",
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2023-03-01",
+      "name": "[parameters('aksClusterName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dnsPrefix": "[format('{0}-dns', parameters('aksClusterName'))]",
+        "agentPoolProfiles": [
+          {
+            "name": "agentpool",
+            "count": 3,
+            "vmSize": "Standard_DS2_v2",
+            "osType": "Linux",
+            "vnetSubnetID": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('aksVnetName')), '2023-02-01').subnets[0].id]"
+          }
+        ],
+        "enableRBAC": true,
+        "networkProfile": {
+          "networkPlugin": "azure",
+          "serviceCidr": "10.0.0.0/16",
+          "dnsServiceIP": "10.0.0.10"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('aksVnetName'))]",
+        "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "acrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]"
+    },
+    "logAnalyticsId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
+    },
+    "keyVaultId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+    },
+    "aksId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName'))]"
+    },
+    "appGatewayId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/applicationGateways', parameters('appGatewayName'))]"
+    }
+  }
+}
