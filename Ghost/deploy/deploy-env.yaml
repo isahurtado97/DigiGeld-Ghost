@@ -35,26 +35,18 @@ jobs:
                 azureSubscription: ${{ parameters.azureSubscription }} # Replace with your Azure service connection
                 ScriptType: 'InlineScript'
                 Inline: |
-                    if($null -eq(Get-AzResourceGroup -Name ${{ parameters.resource_group }} -ErrorAction SilentlyContinue)){
-                      Write-host "Creating Resource Group"
-                      $null= New-AzResourceGroup -ResourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -Force
-                    }
                     Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                    Deploy-Infra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acr_name }} -basepath "$(Pipeline.Workspace)/artifacts/Ghost/templates"
-                    Enable-AzAksAddon -ResourceGroupName ${{ parameters.resource_group }} -ClusterName ${{ parameters.cluster_name }} -Name AzurePolicy
+                    Deploy-Infra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acr_name }} -basepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/bicep"
                 azurePowerShellVersion: 'LatestVersion'
             # Deploying App: ghost-deployment.yaml file customize.
             - task: PowerShell@2
               condition: eq(variables['deployApp'], 'true')
               displayName: "Deploying App: ghost-deployment.yaml file customize."
               inputs:
-                targetType: 'filePath'
-                filePath: '$(Pipeline.Workspace)/artifacts/Ghost/scripts/powershell/setup-ghost-file.ps1'
-                arguments: >
-                  -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/ghost-deployment.yaml" 
-                  -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/${{ parameters.cluster_name }}.yaml"
-                  -password "xxxsss" 
-                  -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
+                ScriptType: 'InlineScript'
+                Inline: |
+                  Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
+                  Setup-Ghost-Files -filepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/ghost-deployment.yaml" -filefinalpath "$(Pipeline.Workspace)/artifacts/Ghost/templates/yaml/${{ parameters.cluster_name }}.yaml" -image "${{parameters.acr_name}}.azurecr.io/ghost-app:${{parameters.build_id}}"
                 pwsh: true
             # Deploying App: Push Ghost Image to AKS.
             - task: Bash@3

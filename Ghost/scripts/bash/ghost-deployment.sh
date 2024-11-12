@@ -3,61 +3,9 @@
 RESOURCE_GROUP=$1
 CLUSTER_NAME=$2
 IMAGE_YAML=$3
-NAMESPACE="ghost"
-#Script
-#sed -i "s/password/${NEW_PASSWORD}/g" "$FILE_PATH"
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
-# Create Namespace
-if [ -z "$NAMESPACE" ]; then
-  echo "Namespace name not provided."
-  exit 1
-fi
-# Check if the namespace exists
-kubectl get namespace $NAMESPACE >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo "Namespace '$NAMESPACE' does not exist. Creating namespace..."
-  kubectl create namespace $NAMESPACE
-
-  if [ $? -eq 0 ]; then
-    echo "Namespace '$NAMESPACE' created successfully."
-  else
-    echo "Failed to create namespace '$NAMESPACE'."
-    exit 1
-  fi
-else
-  echo "Namespace '$NAMESPACE' already exists."
-fi
-#Configure and create ghost deployment
+helm repo add spv-charts https://charts.spvapi.no
+helm repo update
+helm install akv2k8s spv-charts/akv2k8s --namespace akv2k8s --create-namespace
 kubectl apply -f $IMAGE_YAML
-#Enable AKS addons ingress
-# Check if ingress-appgw addon is already enabled
-addonEnabled=$(az aks show \
-  --resource-group $RESOURCE_GROUP \
-  --name $CLUSTER_NAME \
-  --query "addonProfiles.ingressApplicationGateway.enabled" -o tsv)
 
-if [ "$addonEnabled" == "true" ]; then
-    echo "The ingress-appgw addon is already enabled for cluster $CLUSTER_NAME."
-else
-    echo "Enabling ingress-appgw addon for cluster $CLUSTER_NAME..."
-
-    # Retrieve Application Gateway ID
-    appGatewayId=$(az network application-gateway show \
-      --name "$CLUSTER_NAME-appgw" \
-      --resource-group "$CLUSTER_NAME" \
-      --query "id" -o tsv)
-
-    if [ -z "$appGatewayId" ]; then
-        echo "Error: Application Gateway not found for $CLUSTER_NAME."
-        exit 1
-    fi
-
-    # Enable ingress-appgw addon
-    az aks enable-addons \
-      --resource-group $RESOURCE_GROUP \
-      --name $CLUSTER_NAME \
-      --addons ingress-appgw \
-      --appgw-id $appGatewayId
-
-    echo "ingress-appgw addon has been successfully enabled for cluster $CLUSTER_NAME."
-fi

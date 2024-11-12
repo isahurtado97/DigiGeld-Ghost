@@ -36,12 +36,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: ghost-secrets
-              key: user
+              key: ghost-user
         - name: database__connection__password
           valueFrom:
             secretKeyRef:
               name: ghost-secrets
-              key: password
+              key: ghost-password
         - name: database__connection__database
           value: dgghostdb
         volumeMounts:
@@ -102,19 +102,19 @@ spec:
           valueFrom:
             secretKeyRef:
               name: ghost-secrets
-              key: root-password
+              key: ghost-root-password
         - name: MYSQL_DATABASE
           value: dgghostdb
         - name: MYSQL_USER
           valueFrom:
             secretKeyRef:
               name: ghost-secrets
-              key: user
+              key: ghost-user
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: ghost-secrets
-              key: password
+              key: ghost-password
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
@@ -180,26 +180,26 @@ spec:
 
 ---
 
-# AzureKeyVaultSecret for root-password
+# AzureKeyVaultSecret for ghost-root-password
 apiVersion: spv.no/v2beta1
 kind: AzureKeyVaultSecret
 metadata:
-  name: root-password-sync
+  name: ghost-root-password-sync
   namespace: ghost
 spec:
   vault:
     name: "dg-aks-acc-vault"  # Replace with your Azure Key Vault name
     object:
-      name: "root-password"     # Secret name in Azure Key Vault
+      name: "ghost-root-password"     # Secret name in Azure Key Vault
       type: secret
   output:
     secret:
       name: ghost-secrets       # Kubernetes Secret to create/update
-      dataKey: root-password    # Key inside the Kubernetes Secret
+      dataKey: ghost-root-password    # Key inside the Kubernetes Secret
 
 ---
 
-# AzureKeyVaultSecret for password
+# AzureKeyVaultSecret for ghost-password
 apiVersion: spv.no/v2beta1
 kind: AzureKeyVaultSecret
 metadata:
@@ -209,12 +209,12 @@ spec:
   vault:
     name: "dg-aks-acc-vault"
     object:
-      name: "password"          # Secret name in Azure Key Vault
+      name: "ghost-password"          # Secret name in Azure Key Vault
       type: secret
   output:
     secret:
       name: ghost-secrets       # Kubernetes Secret to create/update
-      dataKey: password
+      dataKey: ghost-password
 
 ---
 
@@ -228,12 +228,12 @@ spec:
   vault:
     name: "dg-aks-acc-vault"
     object:
-      name: "user"          # Secret name in Azure Key Vault
+      name: "ghost-user"          # Secret name in Azure Key Vault
       type: secret
   output:
     secret:
       name: ghost-secrets       # Kubernetes Secret to create/update
-      dataKey: user
+      dataKey: ghost-user
 
 ---
 # AzureKeyVault tlc certf
@@ -246,7 +246,7 @@ spec:
   vault:
     name: "dg-aks-acc-vault"
     object:
-      name: dgghostapp
+      name: dgghostapp-cert
       type: certificate
   output:
     secret:
