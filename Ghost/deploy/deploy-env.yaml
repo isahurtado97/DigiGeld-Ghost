@@ -41,12 +41,10 @@ jobs:
                   }
                   $parameters = @{
                     deployAll = $false
-                    deployAks = $true
                     deployAcr = $true
                     deployLogAnalytics = $false
                     deployKeyVault = $true
                     acrName="${{ parameters.acr_name }}"
-                    aksClusterName="${{ parameters.cluster_name }}"
                     location="${{ parameters.location }}"
                     logAnalyticsWorkspaceName="${{ parameters.cluster_name }}-Workspace"
                     KeyvaultName="${{ parameters.resource_group  }}-vault"
