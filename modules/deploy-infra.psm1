@@ -109,7 +109,8 @@ function Deploy-infra{
      [string]$resourceGroupName,
      [string]$Location,
      [string]$aksClusterName,
-     [string]$acrName
+     [string]$acrName,
+     [string]$basepath
     )
     begin{
         Ensure-AzModule
@@ -128,6 +129,6 @@ function Deploy-infra{
         workspaces_dg_aks_prod_Workspace_externalid  = $LogAWID
         publicIPAddresses_bd1aec30_36bc_48ef_8301_435ccbf0d11f_externalid  = $PublicIpID
         }
-        New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "infra.bicep" -TemplateParameterObject $parameters -Verbose
+        New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "$basepath/infra.bicep" -TemplateParameterObject $parameters -Verbose
     }
 }
