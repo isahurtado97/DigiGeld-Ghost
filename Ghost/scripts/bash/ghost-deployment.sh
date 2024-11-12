@@ -3,7 +3,7 @@
 RESOURCE_GROUP=$1
 CLUSTER_NAME=$2
 GHOST_YAML=$3
-$MONITORING_YAML =$4
+$MONITORING_YAML=$4
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
 helm repo add spv-charts https://charts.spvapi.no
 helm repo update

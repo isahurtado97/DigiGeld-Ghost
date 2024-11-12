@@ -36,7 +36,7 @@ jobs:
                 ScriptType: 'InlineScript'
                 Inline: |
                     Import-Module '$(Pipeline.Workspace)/artifacts/modules/deploy-infra.psm1'
-                    Deploy-Infra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acr_name }} -basepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/bicep"
+                    DeployInfra -resourceGroupName ${{ parameters.resource_group }} -Location ${{ parameters.location }} -aksClusterName ${{ parameters.cluster_name }} -acrName ${{ parameters.acr_name }} -basepath "$(Pipeline.Workspace)/artifacts/Ghost/templates/bicep"
                 azurePowerShellVersion: 'LatestVersion'
             # Deploying App: ghost-deployment.yaml file customize.
             - task: PowerShell@2

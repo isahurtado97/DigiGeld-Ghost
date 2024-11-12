@@ -1,4 +1,4 @@
-function Ensure-AzModule {
+function EnsureAzModule {
     try {
         # Try to import the Az module
         Import-Module Az -Force -ErrorAction Stop
@@ -16,21 +16,23 @@ function Ensure-AzModule {
         Write-Host "Az module successfully installed and imported."
     }
 }
-function Create-AzResorceGroup {
+function DeployAzResourceGroup {
     param(
         [string]$resourceGroupName,
         [string]$location
     )
-    # Check if Resource Group exists
-    $resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
-    if (-not $resourceGroup) {
-        Write-Host "Creating Resource Group..."
-        New-AzResourceGroup -Name $resourceGroupName -Location $location
-    } else {
-        Write-Host "Resource Group '$resourceGroupName' already exists."
+    process{
+        # Check if Resource Group exists
+        $resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+        if (-not $resourceGroup) {
+            Write-Host "Creating Resource Group..."
+            New-AzResourceGroup -Name $resourceGroupName -Location $location
+        } else {
+            Write-Host "Resource Group '$resourceGroupName' already exists."
+        }
     }
 }
-function Create-LogAnalyticsWorkspace {
+function DeployLogAnalyticsWorkspace {
     param(
         [string]$resourceGroupName,
         [string]$location,
@@ -52,7 +54,7 @@ function Create-LogAnalyticsWorkspace {
         Write-Host "Log Analytics Workspace created successfully."
     }
 }
-function Deploy-SecurityConfig {
+function DeploySecurityConfig {
     param(
         [string]$resourceGroupName,
         [string]$location,
@@ -85,7 +87,7 @@ function Deploy-SecurityConfig {
     }
 
 }
-function Deploy-vnetPeer{
+function DeployvnetPeer{
     # Variables
     param(
         $ResourceGroupName
@@ -101,7 +103,7 @@ function Deploy-vnetPeer{
     -RemoteVirtualNetworkId $appGwnet.Id `
     -AllowVirtualNetworkAccess $true
 }
-function Deploy-infra{
+function Deployinfra{
     param(
      [string]$resourceGroupName,
      [string]$Location,
@@ -113,9 +115,9 @@ function Deploy-infra{
         Ensure-AzModule
     }
     process{
-        Create-AzResorceGroup -resourceGroupName $resourceGroupName -location $Location
-        Deploy-SecurityConfig -resourceGroupName $resourceGroupName -Location $Location -clusterName $clusterName
-        Create-LogAnalyticsWorkspace -resourceGroupName $resourceGroupName -Location $Location -acrName $acrName -clusterName $clusterName -sku 'Standard'
+        DeployAzResourceGroup -resourceGroupName $resourceGroupName -location $Location
+        DeploySecurityConfig -resourceGroupName $resourceGroupName -Location $Location -clusterName $clusterName
+        CreateLogAnalyticsWorkspace -resourceGroupName $resourceGroupName -Location $Location -acrName $acrName -clusterName $clusterName -sku 'Standard'
         $AppGatewayID=Get-AzResource -ResourceName "$clusterName-appgw" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $PublicIpID=Get-AzResource -ResourceName "$clusterName-pip" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
         $LogAWID=Get-AzResource -ResourceName "$clusterName-Workspace" -resourceGroupName $resourceGroupName | Select-Object -ExpandProperty ResourceId
@@ -131,7 +133,7 @@ function Deploy-infra{
         New-AzResourceGroupDeployment -resourceGroupName $resourceGroupName -TemplateFile "$basepath/infra.bicep" -TemplateParameterObject $parameters -Verbose
         Enable-AzAksAddon -resourceGroupName $resourceGroupName -clusterName $clusterName -Name AzurePolicy
         identityAzKeyvaultAks -resourceGroupName $resourceGroupName -clusterName $clusterName -keyVaultName "$clusterName-vault"
-        Deploy-vnetPeer -ResourceGroupName $resourceGroupName
+        DeployvnetPeer -ResourceGroupName $resourceGroupName
     }
 }
 function identityAzKeyvaultAks{ 
