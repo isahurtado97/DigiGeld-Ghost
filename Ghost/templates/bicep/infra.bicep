@@ -150,9 +150,6 @@ resource managedClusters_dg_aks_prod_name_resource 'Microsoft.ContainerService/m
     oidcIssuerProfile: {
       enabled: true
     }
-    workloadIdentityProfile: {
-      enabled: true // Enable Workload Identity
-    }
     storageProfile: {
       diskCSIDriver: {
         enabled: true
